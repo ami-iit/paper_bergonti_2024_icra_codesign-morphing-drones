@@ -176,7 +176,6 @@ if __name__ == "__main__":
     db_ff = Database_results(name_database="multiple_trajectories")
 
     list_robot = [
-        "fixed_wing_drone",
         "fixed_wing_drone_back",
         "drone_nsga_46295d0_1",
         "drone_nsga_46295d0_2",
@@ -193,11 +192,7 @@ if __name__ == "__main__":
     list_ic_pitch = [-5, 0, 5]
     list_ic_yaw = [0]
 
-    print(
-        f"N tests:{len(list_robot) * len(list_goal_dist) * len(list_goal_angl) * len(list_obst_radius) * len(list_obst_type) * len(list_ic_speed_x) * len(list_ic_roll) * len(list_ic_pitch) * len(list_ic_yaw)}"
-    )
-
-    with multiprocessing.Pool(processes=48) as pool:
+    with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
         pool.starmap(
             solve_s_trajectory,
             [

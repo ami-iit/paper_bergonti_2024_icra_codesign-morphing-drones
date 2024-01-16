@@ -449,7 +449,7 @@ class Codesign_DEAP:
         crossover_prob: float = 0.6,
         mutation_prob: float = 0.01,
         n_processors: int = 1,
-        feasible_initial_population: bool = False,
+        start_with_feasible_initial_population: bool = False,
     ) -> None:
         self.stgs = {}
         self.n_objectives = 2
@@ -463,7 +463,7 @@ class Codesign_DEAP:
         self.stgs["crossover_prob"] = crossover_prob
         self.stgs["mutation_prob"] = mutation_prob
         self.stgs["n_processors"] = n_processors
-        self.stgs["feasible_initial_population"] = feasible_initial_population
+        self.stgs["start_with_feasible_initial_population"] = start_with_feasible_initial_population
         self.str_date = utils_muav.get_date_str()
         self.name_temp_output = f"deap_temp"
         self.stats = Stats_Codesign(self.stgs["n_pop"], self.stgs["n_gen"], self.n_objectives, self.stgs)
@@ -506,7 +506,7 @@ class Codesign_DEAP:
 
         # create initial population
         pop = toolbox.population(n=self.stgs["n_pop"])
-        if self.stgs["feasible_initial_population"]:
+        if self.stgs["start_with_feasible_initial_population"]:
             list_pop = self.get_initial_population()
             for i in range(self.stgs["n_pop"]):
                 pop[i] = creator.Chromosome(list_pop[i])
@@ -773,7 +773,7 @@ if __name__ == "__main__":
         n_gen=100,
         crossover_prob=0.9,
         mutation_prob=1 / 15,
-        feasible_initial_population=False,
+        start_with_feasible_initial_population=False,
         n_processors=multiprocessing.cpu_count(),
     )
     pop = cod.run()

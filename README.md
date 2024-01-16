@@ -70,7 +70,7 @@ Please refer to [the documentation in `robotology-superbuild`](https://github.co
 > When you activate the conda environment, the ROS environment is automatically sourced. If you want to deactivate the ROS environment, you should open a new terminal.
 
 > [!WARNING]
-> Note that to replicate the paper results, you need to install the hsl solvers (here we use `ma27`) that can be downloaded but not redistributed. Please check [here](https://licences.stfc.ac.uk/product/coin-hsl).
+> Note that to replicate the paper results, you need to install the HSL solvers (here we use `ma27`), which can be downloaded but not redistributed. Please check [here](https://licences.stfc.ac.uk/product/coin-hsl). Once you have downloaded and configured the solver, you have to modify [this line](TODO) and set `ma27`.
 
 > [!NOTE]
 > The installation procedure has been tested on `Ubuntu 22.04` in a `WSL2` environment. Windows is not supported due to the lack of support for the `ros-noetic-jsk-rviz-plugins` package as of October 2023.

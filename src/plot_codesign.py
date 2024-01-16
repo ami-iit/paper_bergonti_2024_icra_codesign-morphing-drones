@@ -731,7 +731,7 @@ if __name__ == "__main__":
 
     fitness_bix3 = evaluate_bixler()
 
-    # plot_traj("src/ros_muav/urdf/drone_nsga_46295d0_4", Codesign_DEAP.define_tasks()[1])
+    plot_traj("src/ros_muav/urdf/drone_nsga_46295d0_4", Codesign_DEAP.define_tasks()[1])
 
     colors_drones = ["#D62728", "#FF7F0E", "#CBBF5F", "#15B7C3", "#2CA02C"]
 

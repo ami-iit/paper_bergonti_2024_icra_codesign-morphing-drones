@@ -49,8 +49,6 @@ class Trajectory:
             "print_level": 0,
             "sb": "yes",
             "linear_solver": "ma27",
-            # "ma97_print_level": -10,
-            # "ma57_pivtol": 1e-6,
             "nlp_scaling_max_gradient": 100.0,
             "nlp_scaling_min_value": 1e-6,
             "tol": 1e-3,
