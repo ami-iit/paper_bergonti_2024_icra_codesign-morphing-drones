@@ -61,7 +61,7 @@ class Trajectory:
             "acceptable_iter": 2,
             "acceptable_compl_inf_tol": 1,
             "alpha_for_y": "dual-and-full",
-            "max_iter": 1000,
+            "max_iter": 2000,
             "warm_start_bound_frac": 1e-2,
             "warm_start_bound_push": 1e-2,
             "warm_start_mult_bound_push": 1e-2,

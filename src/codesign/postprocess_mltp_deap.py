@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.colors as mcolors
 from deap import creator, base, tools
-from codesign.urdf_chromosome_uav import Chromosome_Drone, create_urdf_model
+from codesign.urdf_chromosome_uav import Chromosome_Drone, create_urdf_model, Gene_Weight_Time_Energy
 import os
 import utils_muav
 from codesign.codesign_deap import Codesign_DEAP
@@ -52,100 +52,7 @@ def select_nsga_drones(pareto, tag="") -> np.ndarray:
     return fitness_sel
 
 
-def select_ga_drones(list_result_ga) -> np.ndarray:
-    fitness_sel = np.zeros((len(list_result_ga), 2))
-    for i, result_ga in enumerate(list_result_ga):
-        import pandas as pd
-
-        df = pd.read_csv(result_ga["pkl"] + ".csv")
-        # find row with best fitness
-        idx = df["fitness_function"].idxmax()
-        fitness_sel[i, :] = (df.iloc[idx][["energy", "time"]].values) / 5
-        chromo = eval(df.iloc[idx]["chromosome"])
-        chromo[-1] = 2  # because ga tested are executed with a fixed controller gain
-        fullpath_model = create_urdf_model(chromo, overwrite=False)
-        repo_tree = utils_muav.get_repository_tree(relative_path=True)
-        os.rename(f"{fullpath_model}.urdf", f"{repo_tree['urdf']}/drone_ga_{i+1}.urdf")
-        os.rename(f"{fullpath_model}.toml", f"{repo_tree['urdf']}/drone_ga_{i+1}.toml")
-    return fitness_sel
-
-
-def plot_pareto_front_evolution(list_result_nsga, list_gen):
-    for i, result_deap in enumerate(list_result_nsga):
-        stats_deap = Stats_Codesign.load(result_deap["pkl"])
-        pal = sns.color_palette("GnBu_d", len(list_gen))
-        plt.figure(figsize=(7, 3))
-        for j, gen in enumerate(list_gen):
-            plt.plot(
-                stats_deap.fitness_front[0][gen],
-                stats_deap.fitness_front[1][gen],
-                c=pal[j],
-                marker="",
-                label=f"after {gen} generations",
-            )
-        plt.legend()
-        plt.xlabel("Energy [J]")
-        plt.ylabel("Time [s]")
-        plt.grid(color="0.9")
-        plt.gca().set_axisbelow(True)
-        plt.xlim([52.2, 236])
-        plt.ylim([4.85, 7.1])
-        plt.tight_layout()
-        plt.legend()
-        plt.savefig(f"pareto_front_ev{i}.png")
-        plt.savefig(f"pareto_front_ev{i}.pdf")
-
-
-def plot_pareto_front_evolution_video(list_result_nsga):
-    pal = list(mcolors.TABLEAU_COLORS) + sns.color_palette("Blues", 10)
-
-    fig, ax1 = plt.subplots(1, 1, figsize=(3, 2), dpi=5000)
-    ax1.set_xlim((56.76203784720779, 316.3087760589073))
-    ax1.set_ylim((4.9087881235901545, 7.187344461696856))
-    stats_deap = Stats_Codesign.load(list_result_nsga[0]["pkl"])
-    gen = len(stats_deap.fitness_front[0]) - 1
-    ax1.plot(stats_deap.fitness_front[0][gen], stats_deap.fitness_front[1][gen], c=pal[-0 - 1])
-    ax1.set_xlabel("energy consumption")
-    ax1.set_ylabel("agility")
-    ax1.set_xticklabels([])
-    ax1.set_yticklabels([])
-    plt.tight_layout()
-    plt.savefig("pareto_front_small.png")
-
-    fps = 4
-    fig, ax1 = plt.subplots(1, 1, figsize=(8, 4.3), dpi=500)
-    pal = list(mcolors.TABLEAU_COLORS) + sns.color_palette("Blues", 10)
-    ax1.grid(color="0.9")
-    ax1.set_xlim((56.76203784720779, 316.3087760589073))
-    ax1.set_ylim((4.9087881235901545, 7.187344461696856))
-    ax1.set_xlabel("energy consumption [J]")
-    ax1.set_ylabel("mission completion time [s]")
-
-    def update(frame):
-        result_deap = list_result_nsga[frame]
-        stats_deap = Stats_Codesign.load(result_deap["pkl"])
-        gen = len(stats_deap.fitness_front[0]) - 1
-        ax1.plot(stats_deap.fitness_front[0][gen], stats_deap.fitness_front[1][gen], c=pal[-frame - 1])
-
-    # Create the animation
-    ani = FuncAnimation(fig, update, frames=len(list_result_nsga), interval=1000 / fps)
-    video_writer = ani.save("pareto_front_evolution.mp4", fps=fps, extra_args=["-vcodec", "libx264"], dpi=600)
-
-    fig, ax1 = plt.subplots(1, 1, figsize=(8, 4.3), dpi=500)
-    for i, result_deap in enumerate(list_result_nsga):
-        stats_deap = Stats_Codesign.load(result_deap["pkl"])
-        gen = len(stats_deap.fitness_front[0]) - 1
-        pal = list(mcolors.TABLEAU_COLORS) + sns.color_palette("Blues", 10)
-        ax1.plot(stats_deap.fitness_front[0][gen], stats_deap.fitness_front[1][gen], c=pal[-i - 1])
-    ax1.grid(color="0.9")
-    ax1.set_xlim((56.76203784720779, 316.3087760589073))
-    ax1.set_ylim((4.9087881235901545, 7.187344461696856))
-    ax1.set_xlabel("energy consumption [J]")
-    ax1.set_ylabel("mission completion time [s]")
-    plt.savefig("pareto_front_video.png")
-
-
-def plot_pareto_front(list_result_nsga, fitness_sel_nsga, fitness_sel_ga, fitness_bix3):
+def plot_pareto_front(list_result_nsga, fitness_sel_nsga, fitness_bix3):
     arrowprops = dict(arrowstyle="-|>", fc="w", connectionstyle="arc3")
     fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(10, 2.105), gridspec_kw={"width_ratios": [1, 0.1]})
     if len(fitness_bix3) > 0:
@@ -220,30 +127,6 @@ def plot_pareto_front(list_result_nsga, fitness_sel_nsga, fitness_sel_ga, fitnes
         xytext=(fitness_sel_nsga[3, 0], fitness_sel_nsga[3, 1] + 0.5),
         arrowprops=arrowprops,
     )
-    if len(fitness_sel_ga) > 0:
-        plt.plot(
-            fitness_sel_ga[:, 0],
-            fitness_sel_ga[:, 1],
-            c="k",
-            marker="o",
-            linestyle="",
-            markersize=6,
-            markerfacecolor="tab:green",
-            # markeredgecolor="brown",
-            label="SOF best individuals",
-        )
-        plt.annotate(
-            f"sof1",
-            xy=fitness_sel_ga[0, :],
-            xytext=(fitness_sel_ga[0, 0] + 20, fitness_sel_ga[0, 1]),
-            arrowprops=arrowprops,
-        )
-        plt.annotate(
-            f"sof2",
-            xy=fitness_sel_ga[1, :],
-            xytext=(fitness_sel_ga[1, 0] + 20, fitness_sel_ga[1, 1]),
-            arrowprops=arrowprops,
-        )
     # plt.title(f"Pareto Front")
     # set xlabel centered between subplots
     ax1.set_xlim((65, 170))
@@ -326,8 +209,6 @@ def plot_genes_variability(list_result_nsga):
         robot_param["com"][i] = np.array(robot_param["com"][i])
         servo_param["torque"][i] = np.array(servo_param["torque"][i])
         servo_param["speed"][i] = np.array(servo_param["speed"][i])
-
-    from codesign.urdf_chromosome_uav import Gene_Weight_Time_Energy
 
     df = pd.read_csv(f'{utils_muav.get_repository_tree()["database_propeller"]}/db_propeller.csv')
     enum_param = {"prop": {0: [], 1: [], 2: [], 3: []}, "contr": {0: [], 1: [], 2: [], 3: []}}
@@ -463,48 +344,6 @@ def plot_genes_variability(list_result_nsga):
     plt.xlabel("Generation")
     plt.ylabel("unique chromosomes")
     plt.savefig("gene_paretos.png")
-
-
-def plot_fitness_ga(list_result_ga):
-    if len(list_result_ga) > 0:
-        max_n_gen = 101
-        best = np.zeros((len(list_result_ga), max_n_gen))
-        for i, result_ga in enumerate(list_result_ga):
-            best[i, :] = -np.array(pygad.load(filename=result_ga["pkl"]).best_solutions_fitness)
-        plt.figure(figsize=(4, 2.5))
-        plt.plot(range(max_n_gen), best.mean(axis=0), color="tab:green")
-        plt.fill_between(range(max_n_gen), best.min(axis=0), best.max(axis=0), alpha=0.2, color="tab:green")
-        # plt.title("Fitness function")
-        plt.ylim([np.min(best), np.max(best[best < 1e6])])
-        plt.xlim([0, max_n_gen])
-        plt.xlabel("Generation")
-        plt.ylabel("Fitness")
-        plt.grid(color="0.9")
-        plt.gca().set_axisbelow(True)
-        plt.tight_layout()
-        plt.savefig("fitness_ga.png")
-        plt.savefig("fitness_ga.pdf", transparent=True)
-
-
-def plot_diversity_ga(list_result_ga):
-    if len(list_result_ga) > 0:
-        max_n_gen = 100
-        div = np.zeros((len(list_result_ga), max_n_gen))
-        print("plot_diversity started")
-        for i, result_ga in enumerate(list_result_ga):
-            div[i, :] = pygad.load(filename=result_ga["pkl"]).diversity
-        plt.figure(figsize=(4, 2.5))
-        plt.plot(range(max_n_gen), div.mean(axis=0), label="Mean", color="tab:green")
-        plt.fill_between(range(max_n_gen), div.min(axis=0), div.max(axis=0), alpha=0.2, color="tab:green")
-        plt.xlim([0, max_n_gen])
-        # plt.title("Diversity")
-        plt.xlabel("Generation")
-        plt.ylabel("Diversity")
-        plt.grid(color="0.9")
-        plt.gca().set_axisbelow(True)
-        plt.tight_layout()
-        plt.savefig("diversity_ga.png")
-        plt.savefig("diversity_ga.pdf", transparent=True)
 
 
 def plot_traj(name_urdf, task):
@@ -820,7 +659,7 @@ def plot_trajs_moving(list_name_urdf, task):
     video_writer = ani.save("trajs_xv.mp4", fps=fps / 2, extra_args=["-vcodec", "libx264"], dpi=600)
 
 
-def print_computational_time(list_result_nsga, list_result_ga):
+def print_computational_time(list_result_nsga):
     print("Computational time")
     print("\tNSGA")
     avg_time = 0
@@ -830,17 +669,6 @@ def print_computational_time(list_result_nsga, list_result_ga):
         time = df["timestamp"].max() - df["timestamp"].min()
         n_chromo = len(df["chromosome"].unique())
         print(f"\t\t{result_deap['name']} \t | {time/3600:.2f} h | {n_chromo} chromosomes analysed")
-        avg_time += time / 3600 / len(list_result_nsga)
-        avg_n_chromo += n_chromo / len(list_result_nsga)
-    print(f"\t\tavg \t | {avg_time:.2f} h | {avg_n_chromo:.0f} chromosomes analysed")
-    avg_time = 0
-    avg_n_chromo = 0
-    print("\tGA")
-    for result_ga in list_result_ga:
-        df = pd.read_csv(result_ga["pkl"] + ".csv")
-        time = df["timestamp"].max() - df["timestamp"].min()
-        n_chromo = len(df["chromosome"].unique())
-        print(f"\t\t{result_ga['name']} \t | {time/3600:.2f} h | {n_chromo} chromosomes analysed")
         avg_time += time / 3600 / len(list_result_nsga)
         avg_n_chromo += n_chromo / len(list_result_nsga)
     print(f"\t\tavg \t | {avg_time:.2f} h | {avg_n_chromo:.0f} chromosomes analysed")
@@ -903,7 +731,7 @@ if __name__ == "__main__":
 
     fitness_bix3 = evaluate_bixler()
 
-    plot_traj("src/ros_muav/urdf/drone_nsga_46295d0_4", Codesign_DEAP.define_tasks()[1])
+    # plot_traj("src/ros_muav/urdf/drone_nsga_46295d0_4", Codesign_DEAP.define_tasks()[1])
 
     colors_drones = ["#D62728", "#FF7F0E", "#CBBF5F", "#15B7C3", "#2CA02C"]
 
@@ -918,14 +746,11 @@ if __name__ == "__main__":
         {"pkl": "result/deap_2023-07-31_08h35m26s", "name": "H"},
     ]
 
-    list_result_ga = []
-
     pareto = compute_total_pareto_front(list_result_nsga)
     fitness_sel_nsga = select_nsga_drones(
         pareto, Stats_Codesign.load(list_result_nsga[-1]["pkl"]).git_info["commit"][:7]
     )
-    fitness_sel_ga = select_ga_drones(list_result_ga)
-    print_computational_time(list_result_nsga, list_result_ga)
+    print_computational_time(list_result_nsga)
 
     plot_trajs(
         [
@@ -949,10 +774,7 @@ if __name__ == "__main__":
         Codesign_DEAP.define_tasks()[1],
     )
 
-    plot_fitness_ga(list_result_ga)
-    plot_diversity_ga(list_result_ga)
-    plot_pareto_front(list_result_nsga, fitness_sel_nsga, fitness_sel_ga, fitness_bix3)
-    # plot_pareto_front_evolution(list_result_nsga, [20, 40, 60, 80, 100])
+    plot_pareto_front(list_result_nsga, fitness_sel_nsga, fitness_bix3)
     plt.show()
     plot_genes_variability(list_result_nsga)
 
