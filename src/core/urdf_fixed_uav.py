@@ -242,8 +242,8 @@ if __name__ == "__main__":
             inertia=[3.7625e-05, 3.7625e-05, 7.5e-05],
             mesh="package://ros_muav/meshes/propeller.stl",
             parent_link="fuselage",
-            pos=[0, 0, 0],
-            rpy=[math.pi, -math.pi / 2, 0],
+            pos=[-0.458, 0.0, -0.076],
+            rpy=[math.pi, -math.pi / 2 - 25 * math.pi / 180, 0],
             tag="",
             thrust_limit=6.142,
             dot_thrust_limit=2 * 6.142,
@@ -252,13 +252,6 @@ if __name__ == "__main__":
     )
     drone["controller_parameters"] = Controller_Parameters_UAV()
     drone["name_robot"] = "drone"
-    drone["fullpath_model"] = f"{utils_muav.get_repository_tree(relative_path=True)['urdf']}/fixed_wing_drone"
-    udg = URDF_fixed_wing(drone)
-    udg.generate_urdf()
-    udg.generate_toml()
-
-    drone["propellers"][0].set_pos([-0.458, 0.0, -0.076])
-    drone["propellers"][0].set_rpy([math.pi, -math.pi / 2 - 25 * math.pi / 180, 0])
     drone["fullpath_model"] = f"{utils_muav.get_repository_tree(relative_path=True)['urdf']}/fixed_wing_drone_back"
     udg = URDF_fixed_wing(drone)
     udg.generate_urdf()

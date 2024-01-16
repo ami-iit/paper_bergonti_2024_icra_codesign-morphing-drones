@@ -6,19 +6,6 @@ from deap import creator, base, tools
 from codesign.urdf_chromosome_uav import Chromosome_Drone, create_urdf_model
 import os
 import utils_muav
-import pygad
-from codesign.codesign_pygad import (
-    fitness_function,
-    my_tournament,
-    my_single_point_crossover,
-    on_crossover,
-    on_fitness,
-    on_generation,
-    on_mutation,
-    on_parents,
-    on_start,
-    on_stop,
-)
 from codesign.codesign_deap import Codesign_DEAP
 from core.robot import Robot
 from traj.trajectory import Gains_Trajectory, Postprocess, Obstacle_Plane
@@ -927,10 +914,8 @@ if __name__ == "__main__":
         {"pkl": "result/deap_2023-07-12_09h12m55s", "name": "D"},
         {"pkl": "result/deap_2023-07-13_19h04m08s", "name": "E"},
         {"pkl": "result/deap_2023-07-25_11h13m36s", "name": "F"},
-        # {"pkl": "result/deap_2023-07-26_14h06m26s", "name": "G"},
-        # {"pkl": "result/deap_2023-07-28_12h43m20s", "name": "H"},
-        {"pkl": "result/deap_2023-07-29_22h52m27s", "name": "I"},
-        {"pkl": "result/deap_2023-07-31_08h35m26s", "name": "J"},
+        {"pkl": "result/deap_2023-07-29_22h52m27s", "name": "G"},
+        {"pkl": "result/deap_2023-07-31_08h35m26s", "name": "H"},
     ]
 
     list_result_ga = []

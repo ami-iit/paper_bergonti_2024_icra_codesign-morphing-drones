@@ -1,6 +1,5 @@
 import os, pandas as pd, casadi as cs
 import numpy as np
-import matplotlib.pyplot as plt
 import pickle
 import utils_muav
 from sklearn.linear_model import Lasso

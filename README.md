@@ -23,9 +23,9 @@ Video TODO
 
 <div align="center">
   <a href="#installation"><b>Installation</b></a> |
-  <a href="https://ieeexplore.ieee.org/document/9793615"><b>Paper</b></a> |
-  <a href="https://arxiv.org/abs/2207.01025"><b>arXiv</b></a> |
-  <a href="https://youtu.be/kMfXb2xqGn4"><b>Video</b></a>
+  <a href="TODO"><b>Paper</b></a> |
+  <a href="https://arxiv.org/abs/2309.13948"><b>arXiv</b></a> |
+  <a href="TODO"><b>Video</b></a>
 </div>
 
 ## Abstract
@@ -40,11 +40,11 @@ Please refer to [the documentation in `robotology-superbuild`](https://github.co
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/ami-iit/element_codesign-morphing-drones.git
+    git clone https://github.com/ami-iit/paper_bergonti_2024_icra_codesign-morphing-drones.git
     ```
 2. Install conda dependencies:
     ```sh
-    cd element_codesign-morphing-drones
+    cd paper_bergonti_2024_icra_codesign-morphing-drones
     mamba env create -n <conda-environment-name> --file environment.yml
     mamba activate  <conda-environment-name>
     ```

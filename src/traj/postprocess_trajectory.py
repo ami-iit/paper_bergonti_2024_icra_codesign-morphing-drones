@@ -2,10 +2,7 @@ import pickle
 from traj.trajectory import Postprocess, Goal
 from core.visualizer import Visualize_robot
 from core.robot import Robot
-import matplotlib.pyplot as plt
-import time
 import numpy as np
-import matplotlib.pyplot as plt
 import glob
 import os
 

@@ -1,12 +1,10 @@
 import pickle
-import copy
 from traj.trajectory import Postprocess
 from core.visualizer import Visualize_robot
 from core.robot import Robot
 import numpy as np
 import glob
 import os
-import pygad
 import pandas as pd
 from codesign.urdf_chromosome_uav import Chromosome_Drone, create_urdf_model
 from codesign.codesign_deap import Stats_Codesign
