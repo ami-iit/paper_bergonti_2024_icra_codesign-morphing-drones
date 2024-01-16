@@ -10,7 +10,6 @@ if __name__ == "__main__":
     plt.rcParams["ps.fonttype"] = 42
 
     encoding = {
-        "fixed_wing_drone": -1,
         "fixed_wing_drone_back": 0,
         "drone_nsga_46295d0_1": 1,
         "drone_nsga_46295d0_2": 2,
