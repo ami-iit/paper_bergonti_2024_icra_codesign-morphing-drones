@@ -1,0 +1,14 @@
+# python
+*.pyc
+*.egg-info/
+*.egg
+venv/*
+
+# ros
+build/*
+devel/*
+.catkin_workspace
+src/CMakeLists.txt
+
+# result
+result/*

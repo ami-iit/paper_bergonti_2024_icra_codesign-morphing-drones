@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+message: "If you use this material, please cite it as below."
+url: "https://github.com/ami-iit/paper_bergonti_2024_icra_codesign-morphing-drones"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Bergonti"
+    given-names: "Fabio"
+    orcid: "https://orcid.org/0000-0003-3455-8056"
+  - family-names: "Nava"
+    given-names: "Gabriele"
+    orcid: "https://orcid.org/0000-0001-8965-2934"
+  - family-names: "Wüest"
+    given-names: "Valentin"
+    orcid: "https://orcid.org/0000-0003-2193-1907"
+  - family-names: "Paolino"
+    given-names: "Antonello"
+    orcid: "https://orcid.org/0000-0003-4077-6420"
+  - family-names: "L'Erario"
+    given-names: "Giuseppe"
+    orcid: "https://orcid.org/0000-0001-6042-3222"
+  - family-names: "Pucci"
+    given-names: "Daniele"
+    orcid: "https://orcid.org/0000-0002-7600-3203"
+  - family-names: "Floreano"
+    given-names: "Dario"
+    orcid: "https://orcid.org/0000-0002-5330-4863"       
+  doi: "TODO"
+  journal: "TODO"
+  month: TODO
+  start: TODO # First page number
+  end: TODO # Last page number
+  title: "Co-Design Optimisation of Morphing Topology and Control of Winged Drones"
+  issue: TODO
+  volume: TODO
+  year: TODO
