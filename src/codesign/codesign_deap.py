@@ -177,7 +177,7 @@ class Stats_Codesign:
         for i in range(self.n_obj):
             fit = np.copy(self.fitness[i])
             if remove_fails:
-                fit[fit >= self.stgs["ff_if_nlp_fails"][i]] = np.nan
+                fit[fit >= Codesign_DEAP.get_value_if_nlp_fails()] = np.nan
             fit.sort(axis=1)
             MEAN = fit.mean(axis=1)
             STD = fit.std(axis=1)
@@ -301,8 +301,8 @@ class Stats_Codesign:
         fitness_offspring = copy.deepcopy(self.fitness_offspring)
         if remove_fails:
             for i in range(len(fitness)):
-                fitness[i][fitness[i] >= self.stgs["ff_if_nlp_fails"][i]] = np.nan
-                fitness_offspring[i][fitness_offspring[i] >= self.stgs["ff_if_nlp_fails"][i]] = np.nan
+                fitness[i][fitness[i] >= Codesign_DEAP.get_value_if_nlp_fails()] = np.nan
+                fitness_offspring[i][fitness_offspring[i] >= Codesign_DEAP.get_value_if_nlp_fails()] = np.nan
         plt.figure(figsize=figsize)
         if plot_all_individuals:
             plt.scatter(fitness[0][: gen + 1, :], fitness[1][: gen + 1, :], c="g", marker=".")
@@ -333,8 +333,8 @@ class Stats_Codesign:
         fitness_offspring = copy.deepcopy(self.fitness_offspring)
         if remove_fails:
             for i in range(len(fitness)):
-                fitness[i][fitness[i] >= self.stgs["ff_if_nlp_fails"][i]] = np.nan
-                fitness_offspring[i][fitness_offspring[i] >= self.stgs["ff_if_nlp_fails"][i]] = np.nan
+                fitness[i][fitness[i] >= Codesign_DEAP.get_value_if_nlp_fails()] = np.nan
+                fitness_offspring[i][fitness_offspring[i] >= Codesign_DEAP.get_value_if_nlp_fails()] = np.nan
         fig = plt.figure(figsize=figsize)
         plt.xlabel(f'{self.stgs["objectives"]["name"][0]} [{self.stgs["objectives"]["unit"][0]}]')
         plt.ylabel(f'{self.stgs["objectives"]["name"][1]} [{self.stgs["objectives"]["unit"][1]}]')
@@ -356,7 +356,7 @@ class Stats_Codesign:
             p.append(plt.scatter(fitness[0][g, :], fitness[1][g, :], c="b", marker=".", animated=True))
             fitness_front = np.array([self.fitness_front[0][g], self.fitness_front[1][g]]).reshape((2, -1))
             if remove_fails:
-                fitness_front[:, fitness_front[0, :] >= self.stgs["ff_if_nlp_fails"][0]] = np.nan
+                fitness_front[:, fitness_front[0, :] >= Codesign_DEAP.get_value_if_nlp_fails()] = np.nan
             p.append(plt.scatter(fitness_front[0, :], fitness_front[1, :], c="r", marker="*", animated=True))
             p.append(
                 plt.text(
@@ -457,7 +457,6 @@ class Codesign_DEAP:
         self.stgs["objectives"]["name"] = ["energy", "time"]
         self.stgs["objectives"]["type"] = ["min", "min"]
         self.stgs["objectives"]["unit"] = ["J", "s"]
-        self.stgs["ff_if_nlp_fails"] = (1e6, 1e6)
         self.stgs["n_pop"] = n_pop
         self.stgs["n_gen"] = n_gen
         self.stgs["crossover_prob"] = crossover_prob
@@ -483,7 +482,7 @@ class Codesign_DEAP:
                     candidate_chromosomes.append(chromosome)
             fitness_values = self.compute_fitness_given_list_chromosomes(candidate_chromosomes)
             for chromosome, fit_val in zip(candidate_chromosomes, fitness_values):
-                if fit_val[0] < self.stgs["ff_if_nlp_fails"][0] * n_tasks:
+                if fit_val[0] < Codesign_DEAP.get_value_if_nlp_fails() * n_tasks:
                     initial_population.append(chromosome)
         initial_population = initial_population[: self.stgs["n_pop"]]
         print("stop get_initial_population")
@@ -665,8 +664,8 @@ class Codesign_DEAP:
         ]
         return list_tasks
 
-    def run_trajectory(self, chromosome: list, task: Task) -> Tuple[str, Dict, Dict]:
-        fullpath_model = create_urdf_model(chromosome=chromosome, overwrite=False)
+    @staticmethod
+    def solve_trajectory(fullpath_model: str, task: Task, folder_name: str) -> Tuple[str, Dict, Dict]:
         robot = Robot(fullpath_model)
         robot.set_joint_limit()
         robot.set_propeller_limit()
@@ -693,30 +692,25 @@ class Codesign_DEAP:
         traj.create()
         try:
             out = traj.solve()
-            traj.save(out, folder_name=f"result/{self.str_date}")
+            traj.save(out, folder_name=folder_name)
             pp = Postprocess(out)
         except:
             pp = Postprocess()
             out = traj._get_empty_out()
         return traj.name_trajectory, pp.stats, out
 
-    def compute_fitness_SO_given_trajectories(self, list_traj_specs: List, list_traj_state: List) -> List[float]:
-        # the fitness function is the inverse of the cost function of the trajectory
-        # if the nlp fails, then the fitness function is set to a very low value
-        # the fitness function is aimed to be maximized
-        N = len(list_traj_specs)
-        list_ff = list(self.stgs["ff_if_nlp_fails"])
-        for traj_specs, traj_state in zip(list_traj_specs, list_traj_state):
-            if traj_state["nlp_output"]["success"]:
-                list_ff[0] += N / (traj_state["nlp_output"]["cost_function"])
-        return list_ff
+    @staticmethod
+    def get_value_if_nlp_fails():
+        return 1e6
 
-    def compute_fitness_MO_given_trajectories(self, list_traj_specs: List, list_traj_state: List) -> List[float]:
+    @staticmethod
+    def compute_fitness_MO_given_trajectories(list_traj_specs: List, list_traj_state: List) -> List[float]:
         # the fitness function is composed by two objectives: the energy and the time
         # if the nlp fails, then the fitness function is set to a very big value
         # the fitness function is aimed to be minimized
         N = len(list_traj_specs)
-        list_ff = [0] * self.n_objectives
+        n_objectives = 2
+        list_ff = [0] * n_objectives
         for traj_specs, traj_state in zip(list_traj_specs, list_traj_state):
             if traj_state["nlp_output"]["success"]:
                 t = traj_specs["time"]["trajectory"]
@@ -724,8 +718,8 @@ class Codesign_DEAP:
                 list_ff[0] += (energy) / N
                 list_ff[1] += (t) / N
             else:
-                list_ff[0] += self.stgs["ff_if_nlp_fails"][0]
-                list_ff[1] += self.stgs["ff_if_nlp_fails"][1]
+                list_ff[0] += Codesign_DEAP.get_value_if_nlp_fails()
+                list_ff[1] += Codesign_DEAP.get_value_if_nlp_fails()
         return list_ff
 
     def compute_fitness_given_list_chromosomes(self, list_chromosomes: List[List[float]]) -> List[List[float]]:
@@ -751,14 +745,18 @@ class Codesign_DEAP:
         # compute fitness function
         with multiprocessing.Pool(processes=n_processors) as pool:
             output_map = pool.starmap(
-                self.run_trajectory,
-                [(chromosome, task) for chromosome in list_chromosomes_to_be_analysed for task in list_tasks],
+                Codesign_DEAP.solve_trajectory,
+                [
+                    (create_urdf_model(chromosome=chromosome, overwrite=False), task, f"result/{self.str_date}")
+                    for chromosome in list_chromosomes_to_be_analysed
+                    for task in list_tasks
+                ],
             )
         for i, chromosome in enumerate(list_chromosomes_to_be_analysed):
             list_traj_name = [t[0] for t in output_map[n_tasks * i : n_tasks * (i + 1)]]
             list_traj_specs = [t[1] for t in output_map[n_tasks * i : n_tasks * (i + 1)]]
             list_traj_state = [t[2] for t in output_map[n_tasks * i : n_tasks * (i + 1)]]
-            list_ff = self.compute_fitness_MO_given_trajectories(list_traj_specs, list_traj_state)
+            list_ff = Codesign_DEAP.compute_fitness_MO_given_trajectories(list_traj_specs, list_traj_state)
             db_ff.update(chromosome, list_ff, list_traj_name, list_traj_specs, list_traj_state, 0)
         db_ff = Database_fitness_function(self.name_temp_output, self.n_objectives)
         list_list_ff = [
