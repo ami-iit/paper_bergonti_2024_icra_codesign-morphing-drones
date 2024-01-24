@@ -514,6 +514,4 @@ if __name__ == "__main__":
     plot_trajectories(traj_state[index_task], drones_colors, list_short_name)
     video_trajectories(traj_state[index_task], drones_colors, list_short_name)
 
-
-
     plt.show()
