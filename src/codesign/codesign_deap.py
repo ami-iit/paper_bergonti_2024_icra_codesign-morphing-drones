@@ -472,7 +472,7 @@ class Codesign_DEAP:
         print("start get_initial_population")
         tested_chromosomes = []
         initial_population = []
-        n_tasks = len(self.define_tasks())
+        n_tasks = len(self.get_scenarios())
         while len(initial_population) < self.stgs["n_pop"]:
             candidate_chromosomes = []
             while len(candidate_chromosomes) < self.stgs["n_pop"]:
@@ -629,7 +629,7 @@ class Codesign_DEAP:
         return chromo
 
     @staticmethod
-    def define_tasks():
+    def get_scenarios():
         list_tasks = [
             Task.define_slalom_trajectory(
                 distance_start_obstacle=20,
@@ -735,7 +735,7 @@ class Codesign_DEAP:
                     self.urdf_locations = os.path.dirname(fullpath_model)
                 list_chromosomes_to_be_analysed.append(chromosome)
         # define tasks
-        list_tasks = self.define_tasks()
+        list_tasks = self.get_scenarios()
         n_tasks = len(list_tasks)
         # compute n_processors
         n_processors = min(

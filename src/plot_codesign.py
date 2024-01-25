@@ -15,6 +15,7 @@ from core.robot import Robot
 import seaborn as sns
 from matplotlib.animation import FuncAnimation
 import multiprocessing
+from typing import List, Dict
 
 
 def evaluate_optimal_pareto_front(list_result_nsga) -> tools.support.ParetoFront:
@@ -59,7 +60,7 @@ def select_four_nsga_drones(tag="") -> np.ndarray:
     return list_optimal_drones
 
 
-def plot_pareto_front(list_result_nsga, fitness, colors_drones, list_short_name):
+def plot_pareto_front(list_result_nsga, fitness, colors_drones, list_short_name, save: bool):
     plt.rcParams["pdf.fonttype"] = 42
     plt.rcParams["ps.fonttype"] = 42
     arrowprops = dict(arrowstyle="-|>", fc="w", connectionstyle="arc3")
@@ -85,7 +86,9 @@ def plot_pareto_front(list_result_nsga, fitness, colors_drones, list_short_name)
             markerfacecolor=colors_drones[0],
             # markeredgecolor="brown",
         )
-        ax2.annotate(list_short_name[0], xy=fitness[0], xytext=(fitness[0][0] - 10, fitness[0][1] - 0.5), arrowprops=arrowprops)
+        ax2.annotate(
+            list_short_name[0], xy=fitness[0], xytext=(fitness[0][0] - 10, fitness[0][1] - 0.5), arrowprops=arrowprops
+        )
     for i, result_deap in enumerate(list_result_nsga):
         stats_deap = Stats_Codesign.load(result_deap["pkl"])
         gen = len(stats_deap.fitness_front[0]) - 1
@@ -161,11 +164,12 @@ def plot_pareto_front(list_result_nsga, fitness, colors_drones, list_short_name)
     plt.tight_layout()
     plt.subplots_adjust(wspace=0.03)
     # plt.legend()
-    plt.savefig("pareto_front.png")
-    plt.savefig("pareto_front.pdf")
+    if save:
+        plt.savefig("pareto_front.png")
+        plt.savefig("pareto_front.pdf")
 
 
-def plot_pareto_front_evolution_video(list_result_nsga):
+def plot_pareto_front_evolution_video(list_result_nsga, save: bool):
     plt.rcParams["pdf.fonttype"] = 42
     plt.rcParams["ps.fonttype"] = 42
     pal = list(mcolors.TABLEAU_COLORS) + sns.color_palette("Blues", 10)
@@ -180,7 +184,8 @@ def plot_pareto_front_evolution_video(list_result_nsga):
     ax1.set_xticklabels([])
     ax1.set_yticklabels([])
     plt.tight_layout()
-    plt.savefig("pareto_front_small.png")
+    if save:
+        plt.savefig("pareto_front_small.png")
 
     fps = 4
     fig, ax1 = plt.subplots(1, 1, figsize=(8, 4.3), dpi=500)
@@ -199,7 +204,8 @@ def plot_pareto_front_evolution_video(list_result_nsga):
 
     # Create the animation
     ani = FuncAnimation(fig, update, frames=len(list_result_nsga), interval=1000 / fps)
-    video_writer = ani.save("pareto_front_evolution.mp4", fps=fps, extra_args=["-vcodec", "libx264"], dpi=600)
+    if save:
+        video_writer = ani.save("pareto_front_evolution.mp4", fps=fps, extra_args=["-vcodec", "libx264"], dpi=600)
 
     fig, ax1 = plt.subplots(1, 1, figsize=(8, 4.3), dpi=500)
     for i, result_deap in enumerate(list_result_nsga):
@@ -212,10 +218,11 @@ def plot_pareto_front_evolution_video(list_result_nsga):
     ax1.set_ylim((4.9087881235901545, 7.187344461696856))
     ax1.set_xlabel("energy consumption [J]")
     ax1.set_ylabel("mission completion time [s]")
-    plt.savefig("pareto_front_video.png")
+    if save:
+        plt.savefig("pareto_front_video.png")
 
 
-def plot_trajectories(traj_state, colors_drones, list_robot_name):
+def plot_trajectories(traj_state, colors_drones, list_robot_name, save: bool):
     plt.rcParams["pdf.fonttype"] = 42
     plt.rcParams["ps.fonttype"] = 42
 
@@ -242,7 +249,7 @@ def plot_trajectories(traj_state, colors_drones, list_robot_name):
     for obstacle in next(iter(traj_state.values()))["constant"]["obstacles"]:
         if type(obstacle) != Obstacle_Plane:
             obstacle.plot_xy()
-    plt.legend(list_short_name, loc="upper right", bbox_to_anchor=(0.8, 1))
+    plt.legend(list_robot_name, loc="upper right", bbox_to_anchor=(0.8, 1))
     ax1.set_xlabel("x [m]")
     ax1.set_ylabel("y [m]")
     ax1.set_ylim([-4.9, 4.7])
@@ -251,8 +258,9 @@ def plot_trajectories(traj_state, colors_drones, list_robot_name):
     ax1.set_xlim([-1, 61])
     ax1.set_aspect("equal")
     plt.tight_layout()
-    plt.savefig("trajs_xy.png", bbox_inches="tight")
-    plt.savefig("trajs_xy.pdf", transparent=True, bbox_inches="tight")
+    if save:
+        plt.savefig("trajs_xy.png", bbox_inches="tight")
+        plt.savefig("trajs_xy.pdf", transparent=True, bbox_inches="tight")
 
     fig = plt.figure(figsize=(10, 2.1))
     ax1 = fig.add_subplot(111)
@@ -273,7 +281,7 @@ def plot_trajectories(traj_state, colors_drones, list_robot_name):
     for obstacle in next(iter(traj_state.values()))["constant"]["obstacles"]:
         if type(obstacle) != Obstacle_Plane:
             obstacle.plot_xy(ax=ax1)
-    plt.legend(list_short_name, loc="upper right", bbox_to_anchor=(0.8, 1))
+    plt.legend(list_robot_name, loc="upper right", bbox_to_anchor=(0.8, 1))
     ax1.set_xlabel("x [m]")
     ax1.set_ylabel("y [m]")
     ax1.set_ylim([-5, 5])
@@ -315,8 +323,9 @@ def plot_trajectories(traj_state, colors_drones, list_robot_name):
     axins.spines["bottom"].set_color("grey")
     plt.tight_layout()
     ax1.indicate_inset_zoom(axins, edgecolor="black", alpha=0.2, facecolor="grey", linewidth=0.1)
-    plt.savefig("trajs_xy.png", bbox_inches="tight")
-    plt.savefig("trajs_xy.pdf", transparent=True, bbox_inches="tight")
+    if save:
+        plt.savefig("trajs_xy.png", bbox_inches="tight")
+        plt.savefig("trajs_xy.pdf", transparent=True, bbox_inches="tight")
 
     fig = plt.figure(figsize=(6, 2))
     ax2 = fig.add_subplot(111)
@@ -330,7 +339,7 @@ def plot_trajectories(traj_state, colors_drones, list_robot_name):
             color=colors_drones[i],
         )
         i += 1
-    plt.legend(list_short_name, loc="upper right")
+    plt.legend(list_robot_name, loc="upper right")
     ax2.set_xlabel("x [m]")
     # write ylabel with interpreter latex
     ax2.set_ylabel(r"$|| \dot{p}_B ||_2$ [m/s]")
@@ -338,11 +347,12 @@ def plot_trajectories(traj_state, colors_drones, list_robot_name):
     ax2.set_axisbelow(True)
     ax2.set_xlim([0, 60])
     plt.tight_layout()
-    plt.savefig("trajs_speed_x.png", bbox_inches="tight")
-    plt.savefig("trajs_speed_x.pdf", transparent=True, bbox_inches="tight")
+    if save:
+        plt.savefig("trajs_speed_x.png", bbox_inches="tight")
+        plt.savefig("trajs_speed_x.pdf", transparent=True, bbox_inches="tight")
 
 
-def video_trajectories(traj_state, colors_drones, list_robot_name):
+def video_trajectories(traj_state, colors_drones, list_robot_name, save: bool):
     plt.rcParams["pdf.fonttype"] = 42
     plt.rcParams["ps.fonttype"] = 42
 
@@ -399,7 +409,8 @@ def video_trajectories(traj_state, colors_drones, list_robot_name):
     ax.set_aspect("equal")
     plt.tight_layout()
     ani = FuncAnimation(fig=fig, func=update_XY, frames=len(time), blit=True, interval=1000 / fps)
-    video_writer = ani.save("trajs_xy.mp4", fps=fps / 2, extra_args=["-vcodec", "libx264"], dpi=600)
+    if save:
+        ani.save("trajs_xy.mp4", fps=fps / 2, extra_args=["-vcodec", "libx264"], dpi=600)
 
     def update_XV(frame):
         x = X[:frame, :]
@@ -430,7 +441,8 @@ def video_trajectories(traj_state, colors_drones, list_robot_name):
     ax.set_axisbelow(True)
     plt.tight_layout()
     ani = FuncAnimation(fig=fig, func=update_XV, frames=len(time), blit=True, interval=1000 / fps)
-    video_writer = ani.save("trajs_xv.mp4", fps=fps / 2, extra_args=["-vcodec", "libx264"], dpi=600)
+    if save:
+        ani.save("trajs_xv.mp4", fps=fps / 2, extra_args=["-vcodec", "libx264"], dpi=600)
 
 
 def print_computational_time_nsga(list_result_nsga):
@@ -449,7 +461,7 @@ def print_computational_time_nsga(list_result_nsga):
 
 
 def evaluate_drones(drones_to_be_evaluated):
-    n_tasks = len(Codesign_DEAP.define_tasks())
+    n_tasks = len(Codesign_DEAP.get_scenarios())
     fitness = np.zeros((len(drones_to_be_evaluated), 2))
     traj_specs = [{drone_name: [] for drone_name in drones_to_be_evaluated} for _ in range(n_tasks)]
     traj_state = [{drone_name: [] for drone_name in drones_to_be_evaluated} for _ in range(n_tasks)]
@@ -458,7 +470,7 @@ def evaluate_drones(drones_to_be_evaluated):
         with multiprocessing.Pool(processes=n_tasks) as pool:
             output_map = pool.starmap(
                 Codesign_DEAP.solve_trajectory,
-                [(fullpath_model, task, f"result") for task in Codesign_DEAP.define_tasks()],
+                [(fullpath_model, task, f"result") for task in Codesign_DEAP.get_scenarios()],
             )
         temp_traj_name = [t[0] for t in output_map]
         temp_traj_specs = [t[1] for t in output_map]
@@ -470,9 +482,29 @@ def evaluate_drones(drones_to_be_evaluated):
     return fitness, traj_specs, traj_state
 
 
+def plot_codesign(list_result_nsga: List[Dict], use_paper_optimal_drones: bool, index_task: int, save: bool):
+    if use_paper_optimal_drones:
+        list_optimal_drones = [
+            "drone_nsga_46295d0_1",  # opt1
+            "drone_nsga_46295d0_2",  # opt2
+            "drone_nsga_46295d0_3",  # opt3
+            "drone_nsga_46295d0_4",  # opt4
+        ]
+    else:
+        list_optimal_drones = select_four_nsga_drones()
+    fitness, traj_specs, traj_state = evaluate_drones(["fixed_wing_drone_back"] + list_optimal_drones)
+    drones_colors = ["#D62728", "#FF7F0E", "#CBBF5F", "#15B7C3", "#2CA02C"]
+    list_short_name = ["bix3", "opt1", "opt2", "opt3", "opt4"]
+    print_computational_time_nsga(list_result_nsga)
+    plot_pareto_front(list_result_nsga, fitness, drones_colors, list_short_name, save)
+    plot_trajectories(traj_state[index_task], drones_colors, list_short_name, save)
+    video_trajectories(traj_state[index_task], drones_colors, list_short_name, save)
+    plt.show()
+
+
 if __name__ == "__main__":
     # script for plotting the results of `run_codesign.py`
-    # if you leave the code unchanged, it will plot the results of the paper.
+    # if you leave the code unchanged, it will plot the results of the paper (figures 5, 6, and 7).
     # if you want to plot your own results, change the path of the csv files in `list_result_nsga`
     list_result_nsga = [
         {"pkl": "result/deap_2023-07-08_09h43m49s", "name": "A"},
@@ -485,33 +517,10 @@ if __name__ == "__main__":
         {"pkl": "result/deap_2023-07-31_08h35m26s", "name": "H"},
     ]
 
-    # setting use_paper_optimal_drones = True will select the opt drones of the paper
+    # Use the opt drones of the paper of choose randomly 4 drones from the pareto front
     use_paper_optimal_drones = True
 
-    # select the task to be plotted
-    index_task = 1
-    # 0, 1, 2, 3, 4
+    # select the task to be plotted (Figure 5 of the paper)
+    index_task = 1  # From 0 to 5
 
-    if use_paper_optimal_drones:
-        list_optimal_drones = [
-            "drone_nsga_46295d0_1",
-            "drone_nsga_46295d0_2",
-            "drone_nsga_46295d0_3",
-            "drone_nsga_46295d0_4",
-        ]
-    else:
-        list_optimal_drones = select_four_nsga_drones()
-
-    drones_to_be_evaluated = ["fixed_wing_drone_back"] + list_optimal_drones
-
-    fitness, traj_specs, traj_state = evaluate_drones(drones_to_be_evaluated)
-
-    drones_colors = ["#D62728", "#FF7F0E", "#CBBF5F", "#15B7C3", "#2CA02C"]
-    list_short_name = ["bix3", "opt1", "opt2", "opt3", "opt4"]
-
-    print_computational_time_nsga(list_result_nsga)
-    plot_pareto_front(list_result_nsga, fitness, drones_colors, list_short_name)
-    plot_trajectories(traj_state[index_task], drones_colors, list_short_name)
-    video_trajectories(traj_state[index_task], drones_colors, list_short_name)
-
-    plt.show()
+    plot_codesign(list_result_nsga, use_paper_optimal_drones, index_task, False)

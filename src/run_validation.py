@@ -91,6 +91,7 @@ def solve_s_trajectory(
     ic_roll: float,
     ic_pitch: float,
     ic_yaw: float,
+    str_date: str,
 ):
     t0_fitness_func = time.time()
     task = define_task(goal_dist, goal_angl, obst_radius, obst_type, ic_speed_x, ic_roll, ic_pitch, ic_yaw)
@@ -149,9 +150,8 @@ def solve_s_trajectory(
     )
 
 
-if __name__ == "__main__":
+def run_validation(dict: Dict):
     str_date = utils_muav.get_date_str()
-
     Database_results("multiple_trajectories").create_empty_csv_database(
         columns=[
             "timestamp",
@@ -174,39 +174,62 @@ if __name__ == "__main__":
         ]
     )
     db_ff = Database_results(name_database="multiple_trajectories")
-
-    list_robot = [
-        "fixed_wing_drone_back",
-        "drone_nsga_46295d0_1",
-        "drone_nsga_46295d0_2",
-        "drone_nsga_46295d0_3",
-        "drone_nsga_46295d0_4",
-    ]
-
-    list_goal_dist = [30, 40, 50]
-    list_goal_angl = [0, 10, 20, 30, 40, 50]
-    list_obst_radius = [0.5, 2, 4, 6, 8]
-    list_obst_type = ["sphere"]
-    list_ic_speed_x = [8, 10, 12]
-    list_ic_roll = [0]
-    list_ic_pitch = [-5, 0, 5]
-    list_ic_yaw = [0]
-
     with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
         pool.starmap(
             solve_s_trajectory,
             [
-                (robot_name, goal_dist, goal_angl, obst_radius, type_obstacle, ic_speed_x, ic_roll, ic_pitch, ic_yaw)
-                for robot_name in list_robot
-                for goal_dist in list_goal_dist
-                for goal_angl in list_goal_angl
-                for obst_radius in list_obst_radius
-                for type_obstacle in list_obst_type
-                for ic_speed_x in list_ic_speed_x
-                for ic_roll in list_ic_roll
-                for ic_pitch in list_ic_pitch
-                for ic_yaw in list_ic_yaw
+                (
+                    robot_name,
+                    goal_dist,
+                    goal_angl,
+                    obst_radius,
+                    type_obstacle,
+                    ic_speed_x,
+                    ic_roll,
+                    ic_pitch,
+                    ic_yaw,
+                    str_date,
+                )
+                for robot_name in dict["robot"]
+                for goal_dist in dict["goal_dist"]
+                for goal_angl in dict["goal_angl"]
+                for obst_radius in dict["obst_radius"]
+                for type_obstacle in dict["obst_type"]
+                for ic_speed_x in dict["ic_speed_x"]
+                for ic_roll in dict["ic_roll"]
+                for ic_pitch in dict["ic_pitch"]
+                for ic_yaw in dict["ic_yaw"]
             ],
         )
-
     db_ff.rename(f"result/mt_{str_date}")
+
+
+if __name__ == "__main__":
+    # Script for running the validation of the co-design methodology (see section VI.B of the paper).
+    # If you leave the code unchanged, it will run with the parameters from the paper.
+    # If you want to run your own validation, change the dictionary `dict` below.
+    validation_dict = {}
+    # Drone names to be tested
+    validation_dict["robot"] = [
+        "fixed_wing_drone_back",  # bix3
+        "drone_nsga_46295d0_1",  # opt1
+        "drone_nsga_46295d0_2",  # opt2
+        "drone_nsga_46295d0_3",  # opt3
+        "drone_nsga_46295d0_4",  # opt4
+    ]
+    # List of distances to be tested (see Fig. 8 of the paper)
+    validation_dict["goal_dist"] = [30, 40, 50]
+    # List of angles to be tested (see Fig. 8 of the paper)
+    validation_dict["goal_angl"] = [0, 10, 20, 30, 40, 50]
+    # List of radii to be tested (see Fig. 8 of the paper)
+    validation_dict["obst_radius"] = [0.5, 2, 4, 6, 8]
+    # List of obstacle types to be tested (see Fig. 8 of the paper)
+    validation_dict["obst_type"] = ["sphere"]
+    # List of initial speed along X to be tested (see Fig. 8 of the paper)
+    validation_dict["ic_speed_x"] = [8, 10, 12]
+    # List of initial drone orientation to be tested (see Fig. 8 of the paper)
+    validation_dict["ic_roll"] = [0]
+    validation_dict["ic_pitch"] = [-5, 0, 5]
+    validation_dict["ic_yaw"] = [0]
+
+    run_validation(validation_dict)
