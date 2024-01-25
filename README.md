@@ -77,7 +77,15 @@ Please refer to [the documentation in `robotology-superbuild`](https://github.co
 
 ## Usage
 
+The results of the paper can be reproduced by running the following scripts:
+- [`run_codesign.py`](src/run_codesign.py)
+- [`run_validation.py`](src/run_validation.py)
 
+The running time is approximately ~31.9 hours and ~4.2 hours for [`run_codesign.py`](src/run_codesign.py) and [`run_validation.py`](src/run_validation.py), respectively, on a PC with an Intel Xeon Silver 4214 CPU (48 cores).
+
+The figures from the paper can be reproduced by running the following scripts:
+- [`plot_codesign.py`](src/plot_codesign.py)
+- [`plot_validation.py`](src/plot_validation.py)
 
 ## Citing this work
 
