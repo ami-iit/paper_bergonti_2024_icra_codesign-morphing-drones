@@ -1,0 +1,12 @@
+<launch>
+
+  <env name="LIBGL_ALWAYS_SOFTWARE" value="true" /> <!-- disable the gpu otherwise rviz does not display meshes https://github.com/microsoft/wslg/issues/554 -->
+
+  <arg name="model" default="$(find ros_muav)/urdf/drone_dst_t1.urdf"/>
+  <arg name="rvizconfig" default="$(find ros_muav)/launch/urdf.rviz" />
+
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+</launch>

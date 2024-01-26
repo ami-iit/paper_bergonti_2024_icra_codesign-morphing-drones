@@ -1,0 +1,34 @@
+world = "world"
+root_link = "root_link"
+
+[joints]
+list = [ "joint_0_twist_right_wing", "joint_1_dihedral_right_wing", "joint_0_twist_left_wing", "joint_1_dihedral_left_wing",]
+pos_limits_ub = [ 0.5235987755982988, 0.5235987755982988, 0.5235987755982988, 0.5235987755982988,]
+pos_limits_lb = [ -0.5235987755982988, -0.5235987755982988, -0.5235987755982988, -0.5235987755982988,]
+vel_limits_ub = [ 5.393067388662478, 1.5707963267948966, 5.393067388662478, 1.5707963267948966,]
+acc_limits_ub = [ 8, 8, 8, 8,]
+tor_limits_ub = [ 0.26, 1.7, 0.26, 1.7,]
+dot_tor_limits_ub = [ 0.52, 3.4, 0.52, 3.4,]
+servomotor_power_constants = [ [ 3.4013605442176877, 2.157226955464991, 0.3537414965986394,], [ 9.23076923076923, 0.2617993877991494, 2.6153846153846154,], [ 3.4013605442176877, 2.157226955464991, 0.3537414965986394,], [ 9.23076923076923, 0.2617993877991494, 2.6153846153846154,],]
+
+[aerodynamics]
+list_frames = [ "aero_frame_fuselage", "aero_frame_right_wing", "aero_frame_left_wing",]
+list_model = [ "aerodynamics/database_aerodynamic_models/fuselage0014_tail0009_221202_101041.p", "aerodynamics/database_aerodynamic_models/wing0009_3_5_230426.p", "aerodynamics/database_aerodynamic_models/wing0009_3_5_230426.p",]
+cross_section = [ 0.07500000000000001, 0.07875, 0.07875,]
+chord = [ 0.75, 0.15, 0.15,]
+alpha_limits_lb = [ -12, -12, -12,]
+alpha_limits_ub = [ 12, 12, 12,]
+beta_limits_lb = [ -30, -120, -120,]
+beta_limits_ub = [ 30, 120, 120,]
+
+[propellers]
+list_frames = [ "prop_frame_fuselage_0",]
+thrust_limits_ub = [ 10.744,]
+dot_thrust_limits_ub = [ 21.488,]
+coeff_thrust_to_power = [ [ 0.0, 16.998, 2.497,],]
+
+[collisions]
+list_frames = [ "collision_frame_0", "collision_frame_1", "collision_frame_2", "collision_frame_3", "collision_frame_4", "collision_frame_5",]
+
+[controller_parameters]
+weight_time_energy = 75
