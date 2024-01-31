@@ -61,12 +61,13 @@ def define_task(
     )
     obs1 = [goal_dist / 2 * np.cos(np.deg2rad(goal_angl)), goal_dist / 2 * np.sin(np.deg2rad(goal_angl)), 0]
     obs2 = [3 * goal_dist / 2 * np.cos(np.deg2rad(goal_angl)), goal_dist / 2 * np.sin(np.deg2rad(goal_angl)), 0]
-    if obst_type == "sphere":
-        list_obstacles.append(Obstacle_Sphere(xyz=obs1, r=obst_radius))
-        list_obstacles.append(Obstacle_Sphere(xyz=obs2, r=obst_radius))
-    elif obst_type == "cylinder":
-        list_obstacles.append(Obstacle_InfiniteCylinder(xy=obs1[:2], r=obst_radius))
-        list_obstacles.append(Obstacle_InfiniteCylinder(xy=obs2[:2], r=obst_radius))
+    if obst_radius > 0:
+        if obst_type == "sphere":
+            list_obstacles.append(Obstacle_Sphere(xyz=obs1, r=obst_radius))
+            list_obstacles.append(Obstacle_Sphere(xyz=obs2, r=obst_radius))
+        elif obst_type == "cylinder":
+            list_obstacles.append(Obstacle_InfiniteCylinder(xy=obs1[:2], r=obst_radius))
+            list_obstacles.append(Obstacle_InfiniteCylinder(xy=obs2[:2], r=obst_radius))
     task = Task(
         name="mt",
         knots=knots,
@@ -222,7 +223,7 @@ if __name__ == "__main__":
     # List of angles to be tested (see Fig. 8 of the paper)
     validation_dict["goal_angl"] = [0, 10, 20, 30, 40, 50]
     # List of radii to be tested (see Fig. 8 of the paper)
-    validation_dict["obst_radius"] = [0.5, 2, 4, 6, 8]
+    validation_dict["obst_radius"] = [0, 0.5, 2, 4, 6, 8]
     # List of obstacle types to be tested (see Fig. 8 of the paper)
     validation_dict["obst_type"] = ["sphere"]
     # List of initial speed along X to be tested (see Fig. 8 of the paper)
