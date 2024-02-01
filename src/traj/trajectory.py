@@ -48,7 +48,7 @@ class Trajectory:
         solvSettings = {
             "print_level": 0,
             "sb": "yes",
-            "linear_solver": "mumps",
+            "linear_solver": "ma27",
             "nlp_scaling_max_gradient": 100.0,
             "nlp_scaling_min_value": 1e-6,
             "tol": 1e-3,
