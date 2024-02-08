@@ -45,7 +45,7 @@ Please refer to [the documentation in `robotology-superbuild`](https://github.co
 2. Install conda dependencies:
     ```sh
     cd paper_bergonti_2024_icra_codesign-morphing-drones
-    mamba env create -n <conda-environment-name> --file environment.yml
+    mamba create --name <conda-environment-name> --file environment.txt
     mamba activate  <conda-environment-name>
     ```
 3. Specify the number of threads used by the optimiser:
@@ -63,7 +63,7 @@ Please refer to [the documentation in `robotology-superbuild`](https://github.co
     ```
 5. Install python repository:
     ```sh
-    pip install -e .
+    pip install --no-deps -e .
     ```
 
 > [!WARNING]
