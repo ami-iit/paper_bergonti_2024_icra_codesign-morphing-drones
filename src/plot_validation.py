@@ -28,8 +28,6 @@ def plot_validation(name_csv_database: str, savefig: bool = False) -> None:
     df["time_normalized"] = df["time"] / (2 * df["distance"])
     df["drone_id"] = df["name_drone"].apply(lambda x: encoding[x])
 
-    df = df[df["drone_id"] != -1]
-
     time_decrease = (
         100
         - (
