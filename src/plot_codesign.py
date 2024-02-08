@@ -3,15 +3,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.colors as mcolors
 from deap import creator, base, tools
-from codesign.urdf_chromosome_uav import Chromosome_Drone, create_urdf_model, Gene_Weight_Time_Energy
+from codesign.urdf_chromosome_uav import Chromosome_Drone, create_urdf_model
 import os
 import utils_muav
 from codesign.codesign_deap import Codesign_DEAP
 from core.robot import Robot
 from traj.trajectory import Gains_Trajectory, Postprocess, Obstacle_Plane
-from traj.trajectory_wholeboby import Trajectory_WholeBody_Planner
 import pandas as pd
-from core.robot import Robot
 import seaborn as sns
 from matplotlib.animation import FuncAnimation
 import multiprocessing

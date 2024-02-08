@@ -104,4 +104,4 @@ if __name__ == "__main__":
     # Script for plotting the results of `run_validation.py`
     # If you leave the code unchanged, it will plot the results from the paper (figure 9).
     # If you want to plot your own results, change the path to the CSV file.
-    plot_validation("result/mt_2023-08-02_09h44m14s.csv", False)
+    plot_validation("result/mt_2024-02-01_11h38m14s.csv", True)
