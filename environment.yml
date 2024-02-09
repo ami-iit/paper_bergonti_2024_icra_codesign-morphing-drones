@@ -626,6 +626,7 @@ dependencies:
   - urdfdom=3.1.1=h8a9b4ce_0
   - urdfdom-py=1.2.1=py39hf3d152e_3
   - urdfdom_headers=1.1.1=h00ab1b0_0
+  - urdf-parser-py=0.0.4=pyhd8ed1ab_0
   - uriparser=0.9.7=hcb278e6_1
   - urllib3=2.2.0=pyhd8ed1ab_0
   - utfcpp=4.0.5=ha770c72_0
@@ -672,5 +673,4 @@ dependencies:
   - zziplib=0.13.69=h27826a3_1
   - pip:
     - liecasadi==0.0.6
-    - odio-urdf==1.2.1
-    - urdf-parser-py==0.0.4
+    - odio_urdf@git+https://github.com/hauptmech/odio_urdf.git@8039543c5d4d66182f242313402ae84e38a5c8ea
