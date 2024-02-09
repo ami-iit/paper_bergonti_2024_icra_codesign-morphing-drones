@@ -671,7 +671,6 @@ dependencies:
   - zstd=1.5.5=hfc55251_0
   - zziplib=0.13.69=h27826a3_1
   - pip:
-    - codesign-morphing-drones==0.1.dev4
     - liecasadi==0.0.6
     - odio-urdf==1.2.1
     - urdf-parser-py==0.0.4
