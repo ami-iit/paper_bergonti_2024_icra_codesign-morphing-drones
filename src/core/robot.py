@@ -396,7 +396,7 @@ class Robot:
             (M22 - M21 @ invM11 @ M12) @ ddot_s
             + (h2 - M21 @ invM11 @ h1)
             - (JtW2 - M21 @ invM11 @ JtW1)
-            - viscous_torque
+            + viscous_torque
         )
 
         return cs.Function(
