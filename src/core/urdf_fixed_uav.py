@@ -200,7 +200,10 @@ if __name__ == "__main__":
             name="",
             axis=[0, 1, 0],
         ).set_motor_param(
-            mass=0.018, inertia=[2.13e-06, 2.13e-06, 2.13e-06], servomotor_power_constants=[3.4, 2.15, 0.35]
+            mass=0.018,
+            inertia=[2.13e-06, 2.13e-06, 2.13e-06],
+            servomotor_power_constants=[3.4, 2.15, 0.35],
+            viscous_friction=0.0048,
         )
     )
     # drone["joints"]["aileron_right"] = copy.deepcopy(drone["joints"]["aileron_left"])
@@ -216,7 +219,10 @@ if __name__ == "__main__":
             name="",
             axis=[0, 0, 1],
         ).set_motor_param(
-            mass=0.018, inertia=[2.13e-06, 2.13e-06, 2.13e-06], servomotor_power_constants=[3.4, 2.15, 0.35]
+            mass=0.018,
+            inertia=[2.13e-06, 2.13e-06, 2.13e-06],
+            servomotor_power_constants=[3.4, 2.15, 0.35],
+            viscous_friction=0.0048,
         )
     )
     drone["joints"]["elevator"] = []
@@ -230,7 +236,10 @@ if __name__ == "__main__":
             name="",
             axis=[0, 1, 0],
         ).set_motor_param(
-            mass=0.018, inertia=[2.13e-06, 2.13e-06, 2.13e-06], servomotor_power_constants=[3.4, 2.15, 0.35]
+            mass=0.018,
+            inertia=[2.13e-06, 2.13e-06, 2.13e-06],
+            servomotor_power_constants=[3.4, 2.15, 0.35],
+            viscous_friction=0.0048,
         )
     )
 

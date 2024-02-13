@@ -320,7 +320,10 @@ class Trajectory_WholeBody_Planner(Trajectory):
                 wrenchProp_w = cs.diagcat(rotm_w_prop, rotm_w_prop) @ wrenchProp_prop
                 sum_Jt_wrenchPro_w += jacobianProp_w.T @ wrenchProp_w
 
-            self.opti.subject_to(M @ dnu + h - sum_Jt_wrenchAero_w - sum_Jt_wrenchPro_w - B @ torque == 0)
+            viscous_torque = np.diag(self.robot.servomotor_viscous_friction) @ ds
+            self.opti.subject_to(
+                M @ dnu + h - sum_Jt_wrenchAero_w - sum_Jt_wrenchPro_w - B @ (torque - viscous_torque) == 0
+            )
 
     def _minimize_energy_consumption(self, gain: int = 1):
         get_global_power_consumption_fun = self.robot.get_global_power_consumption_fun()

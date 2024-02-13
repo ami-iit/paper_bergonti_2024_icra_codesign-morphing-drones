@@ -86,13 +86,18 @@ class Robot:
         )
 
         self.propeller_ratio_torque_thrust = config["propellers"]["ratio_torque_thrust"]
+        self.servomotor_viscous_friction = config["joints"]["servomotor_viscous_friction"]
 
         print("\tRobot loaded.\t")
         print(f"\tmass: \t{self.kinDyn.get_total_mass():.3f} kg")
 
     def get_joint_consumption(self, torque: np.ndarray, joint_vel: np.ndarray) -> np.ndarray:
         consumption = []
-        for coeff, T, w in zip(self.__servomotor_power_constants, torque, joint_vel):
+        for coeff, Tj, w, viscous_friction in zip(
+            self.__servomotor_power_constants, torque, joint_vel, self.servomotor_viscous_friction
+        ):
+            Tf = viscous_friction * w
+            T = Tj + Tf
             R = coeff[0]
             kV = coeff[1]
             kI = coeff[2]
@@ -114,7 +119,9 @@ class Robot:
         thrust = cs.SX.sym("thrust", self.nprop, 1)
         consumption = 0
         for k, coeff in enumerate(self.__servomotor_power_constants):
-            T = joint_tor[k]
+            Tj = joint_tor[k]
+            Tf = self.servomotor_viscous_friction[k] * joint_vel[k]
+            T = Tj + Tf
             w = joint_vel[k]
             R = coeff[0]
             kV = coeff[1]
@@ -296,7 +303,8 @@ class Robot:
             wrenchProp_w = cs.diagcat(rotm_w_prop, rotm_w_prop) @ wrenchProp_prop
             sum_Jt_wrenchPro_w += jacobianProp_w.T @ wrenchProp_w
 
-        dot_nu = cs.solve(M, (sum_Jt_wrenchAero_w + sum_Jt_wrenchPro_w + B @ torque - h))
+        viscous_torque = np.diag(self.servomotor_viscous_friction) @ dot_s
+        dot_nu = cs.solve(M, (sum_Jt_wrenchAero_w + sum_Jt_wrenchPro_w + B @ (torque - viscous_torque) - h))
 
         return cs.Function(
             "dot_nu",
@@ -383,7 +391,13 @@ class Robot:
 
         invM11 = cs.inv(M11)
 
-        torque = (M22 - M21 @ invM11 @ M12) @ ddot_s + (h2 - M21 @ invM11 @ h1) - (JtW2 - M21 @ invM11 @ JtW1)
+        viscous_torque = np.diag(self.servomotor_viscous_friction) @ dot_s
+        torque = (
+            (M22 - M21 @ invM11 @ M12) @ ddot_s
+            + (h2 - M21 @ invM11 @ h1)
+            - (JtW2 - M21 @ invM11 @ JtW1)
+            - viscous_torque
+        )
 
         return cs.Function(
             "torque",

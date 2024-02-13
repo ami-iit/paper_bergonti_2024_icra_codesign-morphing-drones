@@ -10,6 +10,7 @@ acc_limits_ub = [ 8, 8,]
 tor_limits_ub = [ 0.26, 0.26,]
 dot_tor_limits_ub = [ 0.52, 0.52,]
 servomotor_power_constants = [ [ 3.4013605442176877, 2.157226955464991, 0.3537414965986394,], [ 3.4013605442176877, 2.157226955464991, 0.3537414965986394,],]
+servomotor_viscous_friction = [ 0.0048, 0.0048,]
 
 [aerodynamics]
 list_frames = [ "aero_frame_fuselage", "aero_frame_right_wing", "aero_frame_left_wing",]
