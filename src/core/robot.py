@@ -205,7 +205,6 @@ class Robot:
             Cl = self.aero_model_list[aero_frame]["Cl"](alpha, beta, reynolds)  # roll
             Cm = self.aero_model_list[aero_frame]["Cm"](alpha, beta, reynolds)  # pitch
             Cn = self.aero_model_list[aero_frame]["Cn"](alpha, beta, reynolds)  # yaw
-            # TODO: check if this is correct
             D = 0.5 * A * air_density * CD * (Vinf_norm) ** 2
             L = 0.5 * A * air_density * CL * (Vinf_norm) ** 2
             Y = 0.5 * A * air_density * CY * (Vinf_norm) ** 2
