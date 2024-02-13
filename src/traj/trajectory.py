@@ -740,7 +740,7 @@ class Task:
         distance_obstacle_goal = distance_start_obstacle
         distance_obstacle_obstacle = distance_start_obstacle
         distance_start_goal = distance_start_obstacle + distance_obstacle_obstacle + distance_obstacle_goal
-        radius_hidden_goals = distance_start_obstacle * 2 / 3
+        radius_hidden_goals = obstacles_radius
         knots = distance_start_goal + 30
 
         task = Task(
@@ -751,14 +751,14 @@ class Task:
                 .set_position(xyz=[distance_start_goal, 0, 0], isStrict=True, param=0.1)
                 .set_linearVelocity(xyz=final_velocity, isStrict=True, param=0.1),
                 Goal(index=int(knots * 1 / 3)).set_position(
-                    xyz=[distance_obstacle_goal, radius_hidden_goals, 0],
+                    xyz=[distance_obstacle_goal, obstacles_radius * 0.5 + radius_hidden_goals, 0],
                     isStrict=True,
                     param=radius_hidden_goals,
                 ),
                 Goal(index=int(knots * 2 / 3)).set_position(
                     xyz=[
                         distance_obstacle_goal + distance_obstacle_obstacle,
-                        -radius_hidden_goals,
+                        -obstacles_radius * 0.5 - radius_hidden_goals,
                         0,
                     ],
                     isStrict=True,
