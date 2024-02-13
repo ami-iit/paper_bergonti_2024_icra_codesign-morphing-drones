@@ -314,7 +314,9 @@ class Trajectory_WholeBody_Planner(Trajectory):
             for i, prop_frame in enumerate(self.robot.propellers_frame_list):
                 jacobianProp_w = vcat_prop_jacobian_fun[i](tform_w_b, s)
                 rotm_w_prop = vcat_prop_forward_kinematics_fun[i](tform_w_b, s)[:3, :3]
-                wrenchProp_prop = cs.vertcat(cs.MX(2, 1), thrust[i], cs.MX(3, 1))
+                wrenchProp_prop = cs.vertcat(
+                    cs.MX(2, 1), thrust[i], cs.MX(2, 1), thrust[i] * self.robot.propeller_ratio_torque_thrust
+                )
                 wrenchProp_w = cs.diagcat(rotm_w_prop, rotm_w_prop) @ wrenchProp_prop
                 sum_Jt_wrenchPro_w += jacobianProp_w.T @ wrenchProp_w
 

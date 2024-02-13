@@ -622,6 +622,7 @@ def create_urdf_model(chromosome: list, overwrite: bool) -> str:
                             propeller_model["power_coeff_c1"].values[0],
                             propeller_model["power_coeff_c2"].values[0],
                         ],
+                        ratio_torque_thrust=propeller_model["torque_thrust_ratio"].values[0],
                     ).set_tag(f"_{i}")
                 )
 

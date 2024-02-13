@@ -26,6 +26,7 @@ list_frames = [ "prop_frame_fuselage",]
 thrust_limits_ub = [ 6.142,]
 dot_thrust_limits_ub = [ 12.284,]
 coeff_thrust_to_power = [ [ 0.0, 22.36, 2.367,],]
+ratio_torque_thrust = [ 0.127,]
 
 [collisions]
 list_frames = [ "collision_frame_0", "collision_frame_1", "collision_frame_2", "collision_frame_3",]

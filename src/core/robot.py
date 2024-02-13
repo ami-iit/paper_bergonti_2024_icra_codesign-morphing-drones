@@ -85,6 +85,8 @@ class Robot:
             ub_dot_thrust=config["propellers"]["dot_thrust_limits_ub"],
         )
 
+        self.propeller_ratio_torque_thrust = config["propellers"]["ratio_torque_thrust"]
+
         print("\tRobot loaded.\t")
         print(f"\tmass: \t{self.kinDyn.get_total_mass():.3f} kg")
 
@@ -288,7 +290,9 @@ class Robot:
         for i, prop_frame in enumerate(self.propellers_frame_list):
             jacobianProp_w = self.kinDyn.jacobian_fun(prop_frame)(tform_w_b, s)
             rotm_w_prop = self.kinDyn.forward_kinematics_fun(prop_frame)(tform_w_b, s)[:3, :3]
-            wrenchProp_prop = cs.vertcat(cs.SX(2, 1), prop_thrust[i], cs.SX(3, 1))
+            wrenchProp_prop = cs.vertcat(
+                cs.SX(2, 1), prop_thrust[i], cs.SX(2, 1), prop_thrust[i] * self.propeller_ratio_torque_thrust
+            )
             wrenchProp_w = cs.diagcat(rotm_w_prop, rotm_w_prop) @ wrenchProp_prop
             sum_Jt_wrenchPro_w += jacobianProp_w.T @ wrenchProp_w
 
@@ -322,7 +326,9 @@ class Robot:
         for i, prop_frame in enumerate(self.propellers_frame_list):
             jacobianProp_w = self.kinDyn.jacobian_fun(prop_frame)(tform_w_b, s)
             rotm_w_prop = self.kinDyn.forward_kinematics_fun(prop_frame)(tform_w_b, s)[:3, :3]
-            wrenchProp_prop = cs.vertcat(cs.SX(2, 1), prop_thrust[i], cs.SX(3, 1))
+            wrenchProp_prop = cs.vertcat(
+                cs.SX(2, 1), prop_thrust[i], cs.SX(2, 1), prop_thrust[i] * self.propeller_ratio_torque_thrust
+            )
             wrenchProp_w = cs.diagcat(rotm_w_prop, rotm_w_prop) @ wrenchProp_prop
             sum_Jt_wrenchPro_w += jacobianProp_w.T @ wrenchProp_w
 
@@ -363,7 +369,9 @@ class Robot:
         for i, prop_frame in enumerate(self.propellers_frame_list):
             jacobianProp_w = self.kinDyn.jacobian_fun(prop_frame)(tform_w_b, s)
             rotm_w_prop = self.kinDyn.forward_kinematics_fun(prop_frame)(tform_w_b, s)[:3, :3]
-            wrenchProp_prop = cs.vertcat(cs.SX(2, 1), prop_thrust[i], cs.SX(3, 1))
+            wrenchProp_prop = cs.vertcat(
+                cs.SX(2, 1), prop_thrust[i], cs.SX(2, 1), prop_thrust[i] * self.propeller_ratio_torque_thrust
+            )
             wrenchProp_w = cs.diagcat(rotm_w_prop, rotm_w_prop) @ wrenchProp_prop
             sum_Jt_wrenchPro_w += jacobianProp_w.T @ wrenchProp_w
 
@@ -408,7 +416,9 @@ class Robot:
 
         for i, prop_frame in enumerate(self.propellers_frame_list):
             rotm_w_prop = self.kinDyn.forward_kinematics_fun(prop_frame)(tform_w_b, s)[:3, :3]
-            wrenchProp_prop = cs.vertcat(cs.SX(2, 1), prop_thrust[i], cs.SX(3, 1))
+            wrenchProp_prop = cs.vertcat(
+                cs.SX(2, 1), prop_thrust[i], cs.SX(2, 1), prop_thrust[i] * self.propeller_ratio_torque_thrust
+            )
             wrenchProp_w = cs.diagcat(rotm_w_prop, rotm_w_prop) @ wrenchProp_prop
             pos_w_frame = self.kinDyn.forward_kinematics_fun(prop_frame)(tform_w_b, s)[:3, 3]
             S = cs.vertcat(cs.horzcat(I3, O3), cs.horzcat(cs.skew(pos_w_frame - pos_w_com), I3))

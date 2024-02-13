@@ -198,6 +198,7 @@ class URDF_drone_generator:
         self.list_thrust_limit = []
         self.list_dot_thrust_limit = []
         self.list_coeff_thrust_to_power = []
+        self.list_ratio_torque_thrust = []
         self.list_servomotor_power_constants = []
         self.aero_frames = []
         self.aero_pickle_model = []
@@ -458,6 +459,7 @@ class URDF_drone_generator:
         self.list_thrust_limit.append(propeller_param.thrust_limit)
         self.list_dot_thrust_limit.append(propeller_param.dot_thrust_limit)
         self.list_coeff_thrust_to_power.append(propeller_param.coeff_thrust_to_power)
+        self.list_ratio_torque_thrust.append(propeller_param.ratio_torque_thrust)
 
     def _set_colors(self):
         self.odio_urdf_robot(Material("grey", Color(rgba="0.7 0.7 0.7 1")))
@@ -502,6 +504,7 @@ class URDF_drone_generator:
         out["propellers"]["thrust_limits_ub"] = self.list_thrust_limit
         out["propellers"]["dot_thrust_limits_ub"] = self.list_dot_thrust_limit
         out["propellers"]["coeff_thrust_to_power"] = self.list_coeff_thrust_to_power
+        out["propellers"]["ratio_torque_thrust"] = self.list_ratio_torque_thrust
         out["collisions"] = {}
         out["collisions"]["list_frames"] = self.collision_frames
         out["controller_parameters"] = asdict(self.controller_parameters)
@@ -570,6 +573,7 @@ class Propeller_UAV:
     thrust_limit: float = 50000
     dot_thrust_limit: float = 50000
     coeff_thrust_to_power: List = field(default_factory=lambda: [0, 20, 2])
+    ratio_torque_thrust: float = 0
     mesh_scale: List[float] = field(default_factory=lambda: [0.001, 0.001, 0.001])
 
     def set_pos(self, pos):

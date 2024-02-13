@@ -1,8 +1,8 @@
-id,name,mass,voltage,max_thrust,max_power,power_coeff_c0,power_coeff_c1,power_coeff_c2,url
-0,EMAX Emax 1104 5250KV Babyhawk,0.0068,7.65,0.682,22.761,0.000,22.223,16.192,https://database.tytorobotics.com/tests/j3qz/emax-emax-1104-5250kv-babyhawk
-1,T-motor LF40 2305 T-5143 prop,0.0297,11.88,2.397,89.892,0.000,24.297,5.519,https://database.rcbenchmark.com/tests/mny/t-motor-lf40-2305-t-5143-prop
-2,T-motor LF40 5150 prop,0.0312,11.86,2.762,103.015,0.000,21.877,5.663,https://database.rcbenchmark.com/tests/eqn/t-motor-lf40-5150-prop
-3,T-LF40 2450kv T-5150R propeller,0.031,11.96,4.067,101.614,0.000,15.053,2.431,https://database.rcbenchmark.com/tests/w4x/t-lf40-2450kv-t-5150r-propeller
-4,Hypetrain Blaster 2207 2450Kv Gemfan 5040,0.03996,11.19,4.722,129.786,0.000,20.092,1.632,https://database.rcbenchmark.com/tests/9nr/hypetrain-blaster-2207-2450kv-gemfan-5040
-5,Motor EMAX RS2306 with Turnigy Plush 30 A,0.038840000000000006,11.69,6.142,224.308,0.000,22.360,2.367,https://database.rcbenchmark.com/tests/pdg/test-for-motor-emax-rs2306-with-turnigy-plush-30-a
-6,DYS Samguk Shu Gemfan 5055 Hulkie,0.038590000000000006,14.91,10.744,464.549,0.000,16.998,2.497,https://database.rcbenchmark.com/tests/gez/dys-samguk-shu-gemfan-5055-hulkie
+id,name,mass,voltage,max_thrust,max_power,power_coeff_c0,power_coeff_c1,power_coeff_c2,ratio_torque_thrust,url
+0,EMAX Emax 1104 5250KV Babyhawk,0.0068,7.65,0.682,22.761,0,22.223,16.192,0.0142,https://database.tytorobotics.com/tests/j3qz/emax-emax-1104-5250kv-babyhawk
+1,T-motor LF40 2305 T-5143 prop,0.0297,11.88,2.397,89.892,0,24.297,5.519,0.014,https://database.rcbenchmark.com/tests/mny/t-motor-lf40-2305-t-5143-prop
+2,T-motor LF40 5150 prop,0.0312,11.86,2.762,103.015,0,21.877,5.663,0.0138,https://database.rcbenchmark.com/tests/eqn/t-motor-lf40-5150-prop
+3,T-LF40 2450kv T-5150R propeller,0.031,11.96,4.067,101.614,0,15.053,2.431,0.0092,https://database.rcbenchmark.com/tests/w4x/t-lf40-2450kv-t-5150r-propeller
+4,Hypetrain Blaster 2207 2450Kv Gemfan 5040,0.03996,11.19,4.722,129.786,0,20.092,1.632,0.0101,https://database.rcbenchmark.com/tests/9nr/hypetrain-blaster-2207-2450kv-gemfan-5040
+5,Motor EMAX RS2306 with Turnigy Plush 30 A,0.038840000000000006,11.69,6.142,224.308,0,22.36,2.367,0.0127,https://database.rcbenchmark.com/tests/pdg/test-for-motor-emax-rs2306-with-turnigy-plush-30-a
+6,DYS Samguk Shu Gemfan 5055 Hulkie,0.038590000000000006,14.91,10.744,464.549,0,16.998,2.497,0.0123,https://database.rcbenchmark.com/tests/gez/dys-samguk-shu-gemfan-5055-hulkie

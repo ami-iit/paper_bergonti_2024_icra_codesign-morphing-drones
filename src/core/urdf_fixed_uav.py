@@ -248,6 +248,7 @@ if __name__ == "__main__":
             thrust_limit=6.142,
             dot_thrust_limit=2 * 6.142,
             coeff_thrust_to_power=[0.0, 22.36, 2.367],
+            ratio_torque_thrust=0.127,
         )
     )
     drone["controller_parameters"] = Controller_Parameters_UAV()
