@@ -12,7 +12,8 @@ def get_trajectory_output(traj_name: str = None):
         traj_name = max(glob.glob("result/*.p"), key=os.path.getctime)
         print(traj_name)
 
-    s = pickle.load(open(traj_name, "rb"))
+    with open(traj_name, "rb") as f:
+        s = pickle.load(f)
     return s["out"], traj_name
 
 

@@ -4,7 +4,7 @@ import numpy as np
 from core.visualizer import Visualize_robot
 from liecasadi import SE3, SO3, SO3Tangent
 import math
-from typing import Dict
+from typing import Dict, Tuple
 import utils_muav
 import time
 from traj.trajectory import (
@@ -368,6 +368,40 @@ class Trajectory_WholeBody_Planner(Trajectory):
         out["optivar"]["vcat_vinf_norm"] = utils_muav.get_2d_ndarray(sol.value(self.optivar["vcat_vinf_norm"]))
         return out
 
+    @staticmethod
+    def solve_task(fullpath_model: str, task: Task, folder_name: str) -> Tuple[str, Dict, Dict]:
+        robot = Robot(fullpath_model)
+        robot.set_joint_limit()
+        robot.set_propeller_limit()
+        traj = Trajectory_WholeBody_Planner(
+            robot=robot, knots=task.knots, time_horizon=None, regularize_control_input_variations=True
+        )
+        traj.set_gains(
+            Gains_Trajectory(
+                cost_function_weight_time=robot.controller_parameters["weight_time_energy"],
+                cost_function_weight_energy=1,
+            )
+        )
+        traj.set_wind_parameters(air_density=1.225, air_viscosity=1.8375e-5, vel_w_wind=np.array([-1, 0, 0]))
+        traj.set_initial_condition(
+            s=np.zeros(robot.ndofs),
+            dot_s=np.zeros(robot.ndofs),
+            ddot_s=np.zeros(robot.ndofs),
+            pos_w_b=task.ic_position_w_b,
+            quat_w_b=task.ic_quat_w_b,
+            twist_w_b=task.ic_twist_w_b,
+        )
+        [traj.add_goal(goal) for goal in task.list_goals]
+        [traj.add_obstacle(obstacle) for obstacle in task.list_obstacles]
+        traj.create()
+        try:
+            out = traj.solve()
+            traj.save(out, folder_name=folder_name)
+            pp = Postprocess(out)
+        except:
+            pp = Postprocess()
+            out = traj._get_empty_out()
+        return traj.name_trajectory, pp.stats, out
 
 if __name__ == "__main__":
     t0 = time.time()

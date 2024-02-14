@@ -9,6 +9,7 @@ import utils_muav
 from codesign.codesign_deap import Codesign_DEAP
 from core.robot import Robot
 from traj.trajectory import Gains_Trajectory, Postprocess, Obstacle_Plane
+from traj.trajectory_wholeboby import Trajectory_WholeBody_Planner
 import pandas as pd
 import seaborn as sns
 from matplotlib.animation import FuncAnimation
@@ -467,7 +468,7 @@ def evaluate_drones(drones_to_be_evaluated):
         fullpath_model = f"{utils_muav.get_repository_tree(relative_path=True)['urdf']}/{drone_name}"
         with multiprocessing.Pool(processes=n_tasks) as pool:
             output_map = pool.starmap(
-                Codesign_DEAP.solve_trajectory,
+                Trajectory_WholeBody_Planner.solve_task,
                 [(fullpath_model, task, f"result") for task in Codesign_DEAP.get_scenarios()],
             )
         temp_traj_name = [t[0] for t in output_map]

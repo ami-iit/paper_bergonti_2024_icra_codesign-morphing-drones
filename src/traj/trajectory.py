@@ -495,7 +495,8 @@ class Trajectory:
         if os.path.exists(folder_name) is False:
             os.mkdir(folder_name)
         name = f"{folder_name}/{self.robot.name}-{utils_muav.get_date_str()}"
-        pickle.dump({"out": out}, open(name + ".p", "wb"))
+        with open(name + ".p", "wb") as f:
+            pickle.dump({"out": out}, f)
         self._project_status.create_report(name)
         self.name_trajectory = name
         return out
@@ -525,7 +526,8 @@ class Trajectory:
         for i in range(N):
             list_obstacles.append(Obstacle_InfiniteCylinder(xy=[x[i], y[i]], r=r[i]))
         if savedir is not None:
-            pickle.dump(list_obstacles, open(f"{savedir}_{seed}.p", "wb"))
+            with open(f"{savedir}_{seed}.p", "wb") as f:
+                pickle.dump(list_obstacles, f)
         if plot:
             plt.figure()
             for i in range(N):
@@ -695,7 +697,8 @@ class Task:
 
     def save(self) -> "Task":
         name = f"{utils_muav.get_repository_tree()['pickle_codesign_tasks']}/{self.name}.p"
-        pickle.dump(self.out, open(name, "wb"))
+        with open(name, "wb") as f:
+            pickle.dump(self.out, f)
         print(f"Task saved to {name}")
         return self
 

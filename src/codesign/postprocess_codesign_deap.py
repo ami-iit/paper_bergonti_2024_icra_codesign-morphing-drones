@@ -41,7 +41,8 @@ def get_trajectory_output(
     fullpath_model = create_urdf_model(chromosome, overwrite=False)
     index_task = 0
     traj_name = f'{eval(df[df["chromosome"]==str(chromosome)]["traj_name"].values[0])[index_task]}.p'
-    s = pickle.load(open(traj_name, "rb"))
+    with open(traj_name, "rb") as f:
+        s = pickle.load(f)
     print(traj_name)
     print(chromosome_dict)
     return s["out"], traj_name, fullpath_model, stats_deap, df
