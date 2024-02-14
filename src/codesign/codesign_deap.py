@@ -665,41 +665,6 @@ class Codesign_DEAP:
         return list_tasks
 
     @staticmethod
-    def solve_trajectory(fullpath_model: str, task: Task, folder_name: str) -> Tuple[str, Dict, Dict]:
-        robot = Robot(fullpath_model)
-        robot.set_joint_limit()
-        robot.set_propeller_limit()
-        traj = Trajectory_WholeBody_Planner(
-            robot=robot, knots=task.knots, time_horizon=None, regularize_control_input_variations=True
-        )
-        traj.set_gains(
-            Gains_Trajectory(
-                cost_function_weight_time=robot.controller_parameters["weight_time_energy"],
-                cost_function_weight_energy=1,
-            )
-        )
-        traj.set_wind_parameters(air_density=1.225, air_viscosity=1.8375e-5, vel_w_wind=np.array([-1, 0, 0]))
-        traj.set_initial_condition(
-            s=np.zeros(robot.ndofs),
-            dot_s=np.zeros(robot.ndofs),
-            ddot_s=np.zeros(robot.ndofs),
-            pos_w_b=task.ic_position_w_b,
-            quat_w_b=task.ic_quat_w_b,
-            twist_w_b=task.ic_twist_w_b,
-        )
-        [traj.add_goal(goal) for goal in task.list_goals]
-        [traj.add_obstacle(obstacle) for obstacle in task.list_obstacles]
-        traj.create()
-        try:
-            out = traj.solve()
-            traj.save(out, folder_name=folder_name)
-            pp = Postprocess(out)
-        except:
-            pp = Postprocess()
-            out = traj._get_empty_out()
-        return traj.name_trajectory, pp.stats, out
-
-    @staticmethod
     def get_value_if_nlp_fails():
         return 1e6
 
@@ -724,6 +689,7 @@ class Codesign_DEAP:
 
     def compute_fitness_given_list_chromosomes(self, list_chromosomes: List[List[float]]) -> List[List[float]]:
         list_chromosomes_to_be_analysed = []
+        list_chromosomes_fullpath_to_be_analysed = []
         db_ff = Database_fitness_function(self.name_temp_output, self.n_objectives)
         # remove already computed chromosomes and duplicates
         for chromosome in list_chromosomes:
@@ -734,9 +700,8 @@ class Codesign_DEAP:
                 if self.urdf_locations is None:
                     self.urdf_locations = os.path.dirname(fullpath_model)
                 list_chromosomes_to_be_analysed.append(chromosome)
-        # define tasks
-        list_tasks = self.get_scenarios()
-        n_tasks = len(list_tasks)
+                list_chromosomes_fullpath_to_be_analysed.append(fullpath_model)
+        n_tasks = len(self.get_scenarios())
         # compute n_processors
         n_processors = min(
             self.stgs["n_processors"], len(list_chromosomes_to_be_analysed) * n_tasks, multiprocessing.cpu_count()
@@ -745,12 +710,11 @@ class Codesign_DEAP:
         # compute fitness function
         with multiprocessing.Pool(processes=n_processors) as pool:
             output_map = pool.starmap(
-                Codesign_DEAP.solve_trajectory,
-                [
-                    (create_urdf_model(chromosome=chromosome, overwrite=False), task, f"result/{self.str_date}")
-                    for chromosome in list_chromosomes_to_be_analysed
-                    for task in list_tasks
-                ],
+                Trajectory_WholeBody_Planner.solve_task,[
+                    (fullpath_model, task, f"result/{self.str_date}")
+                    for fullpath_model in list_chromosomes_fullpath_to_be_analysed
+                    for task in Codesign_DEAP.get_scenarios()
+                ]
             )
         for i, chromosome in enumerate(list_chromosomes_to_be_analysed):
             list_traj_name = [t[0] for t in output_map[n_tasks * i : n_tasks * (i + 1)]]
