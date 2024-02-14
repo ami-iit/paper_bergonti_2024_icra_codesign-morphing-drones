@@ -451,6 +451,7 @@ class Codesign_DEAP:
         n_processors: int = 1,
         start_with_feasible_initial_population: bool = False,
     ) -> None:
+        assert n_pop % 4 == 0, "n_pop must be a multiple of 4"
         self.stgs = {}
         self.n_objectives = 2
         self.stgs["objectives"] = {}
@@ -710,11 +711,12 @@ class Codesign_DEAP:
         # compute fitness function
         with multiprocessing.Pool(processes=n_processors) as pool:
             output_map = pool.starmap(
-                Trajectory_WholeBody_Planner.solve_task,[
+                Trajectory_WholeBody_Planner.solve_task,
+                [
                     (fullpath_model, task, f"result/{self.str_date}")
                     for fullpath_model in list_chromosomes_fullpath_to_be_analysed
                     for task in Codesign_DEAP.get_scenarios()
-                ]
+                ],
             )
         for i, chromosome in enumerate(list_chromosomes_to_be_analysed):
             list_traj_name = [t[0] for t in output_map[n_tasks * i : n_tasks * (i + 1)]]

@@ -403,6 +403,7 @@ class Trajectory_WholeBody_Planner(Trajectory):
             out = traj._get_empty_out()
         return traj.name_trajectory, pp.stats, out
 
+
 if __name__ == "__main__":
     t0 = time.time()
     robot_name = "drone_nsga_46295d0_1"
