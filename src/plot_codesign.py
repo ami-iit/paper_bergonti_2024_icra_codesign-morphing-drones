@@ -14,6 +14,32 @@ import seaborn as sns
 from matplotlib.animation import FuncAnimation
 import multiprocessing
 from typing import List, Dict
+import shapely
+
+
+def get_patches_goals_and_obstacles(list_goals, list_obstacles):
+    obstacles_polygons = []
+    goal_polygons = []
+    list_patches = []
+    for obstacle in list_obstacles:
+        if type(obstacle) != Obstacle_Plane:
+            obstacles_polygons.append(shapely.Point(obstacle.xy[0], obstacle.xy[1]).buffer(obstacle.r))
+    for goal in list_goals:
+        polygon = shapely.box(
+            goal.position["value"][0] - goal.position["tol"],
+            goal.position["value"][1] - goal.position["tol"],
+            goal.position["value"][0] + goal.position["tol"],
+            goal.position["value"][1] + goal.position["tol"],
+        )
+        for obstacle in obstacles_polygons:
+            if polygon.intersects(obstacle):
+                polygon = polygon.difference(obstacle)
+        goal_polygons.append(polygon)
+    for polygon in obstacles_polygons:
+        list_patches.append(plt.Polygon(list(polygon.exterior.coords), closed=True, fill=True, color="r", alpha=0.15))
+    for polygon in goal_polygons:
+        list_patches.append(plt.Polygon(list(polygon.exterior.coords), closed=True, fill=True, color="g", alpha=0.15))
+    return list_patches
 
 
 def evaluate_optimal_pareto_front(list_result_nsga) -> tools.support.ParetoFront:
@@ -230,38 +256,6 @@ def plot_trajectories(traj_state, colors_drones, list_robot_name, save: bool):
 
     fig = plt.figure(figsize=(10, 2.1))
     ax1 = fig.add_subplot(111)
-
-    i = 0
-    for key, value in traj_state.items():
-        ax1.plot(
-            value["optivar"]["pos_w_b"][0, :],
-            value["optivar"]["pos_w_b"][1, :],
-            label=list_robot_name[i],
-            linewidth=0.8,
-            color=colors_drones[i],
-        )
-        i += 1
-    ax1.plot(0, 0, marker="o", color="tab:blue")
-    for goal in [next(iter(traj_state.values()))["constant"]["goals"][0]]:
-        goal.plot_xy()
-    for obstacle in next(iter(traj_state.values()))["constant"]["obstacles"]:
-        if type(obstacle) != Obstacle_Plane:
-            obstacle.plot_xy()
-    plt.legend(list_robot_name, loc="upper right", bbox_to_anchor=(0.8, 1))
-    ax1.set_xlabel("x [m]")
-    ax1.set_ylabel("y [m]")
-    ax1.set_ylim([-4.9, 4.7])
-    ax1.grid(color="0.9")
-    ax1.set_axisbelow(True)
-    ax1.set_xlim([-1, 61])
-    ax1.set_aspect("equal")
-    plt.tight_layout()
-    if save:
-        plt.savefig("trajs_xy.png", bbox_inches="tight")
-        plt.savefig("trajs_xy.pdf", transparent=True, bbox_inches="tight")
-
-    fig = plt.figure(figsize=(10, 2.1))
-    ax1 = fig.add_subplot(111)
     i = 0
     for key, value in traj_state.items():
         ax1.plot(
@@ -274,11 +268,11 @@ def plot_trajectories(traj_state, colors_drones, list_robot_name, save: bool):
         i += 1
     ax1.plot(0, 0, marker="o", color="tab:blue")
 
-    for goal in next(iter(traj_state.values()))["constant"]["goals"]:
-        goal.plot_xy(ax=ax1)
-    for obstacle in next(iter(traj_state.values()))["constant"]["obstacles"]:
-        if type(obstacle) != Obstacle_Plane:
-            obstacle.plot_xy(ax=ax1)
+    patches_goals_and_obstacles = get_patches_goals_and_obstacles(
+        next(iter(traj_state.values()))["constant"]["goals"], next(iter(traj_state.values()))["constant"]["obstacles"]
+    )
+    for patch in patches_goals_and_obstacles:
+        ax1.add_patch(patch)
     plt.legend(list_robot_name, loc="upper right", bbox_to_anchor=(0.8, 1))
     ax1.set_xlabel("x [m]")
     ax1.set_ylabel("y [m]")
@@ -301,11 +295,11 @@ def plot_trajectories(traj_state, colors_drones, list_robot_name, save: bool):
         )
         i += 1
     axins.plot(0, 0, marker="o", color="tab:blue")
-    for goal in next(iter(traj_state.values()))["constant"]["goals"]:
-        goal.plot_xy(ax=axins)
-    for obstacle in next(iter(traj_state.values()))["constant"]["obstacles"]:
-        if type(obstacle) != Obstacle_Plane:
-            obstacle.plot_xy(ax=axins)
+    patches_goals_and_obstacles = get_patches_goals_and_obstacles(
+        next(iter(traj_state.values()))["constant"]["goals"], next(iter(traj_state.values()))["constant"]["obstacles"]
+    )
+    for patch in patches_goals_and_obstacles:
+        axins.add_patch(patch)
     # ax1.set_ylim([-4.9, 4.7])
     # axins.grid(color="0.9")
     axins.set_xlim([17.5, 22])
@@ -393,11 +387,11 @@ def video_trajectories(traj_state, colors_drones, list_robot_name, save: bool):
     for i in range(len(list_robot_name)):
         mark[i] = plt.plot(X[0, i], Y[0, i], marker="o", color=colors_drones[i])[0]
     ax.plot(0, 0, marker="o", color="tab:blue")
-    for goal in next(iter(traj_state.values()))["constant"]["goals"]:
-        goal.plot_xy(ax=ax)
-    for obstacle in next(iter(traj_state.values()))["constant"]["obstacles"]:
-        if type(obstacle) != Obstacle_Plane:
-            obstacle.plot_xy(ax=ax)
+    patches_goals_and_obstacles = get_patches_goals_and_obstacles(
+        next(iter(traj_state.values()))["constant"]["goals"], next(iter(traj_state.values()))["constant"]["obstacles"]
+    )
+    for patch in patches_goals_and_obstacles:
+        ax.add_patch(patch)
     ax.set_xlabel("x [m]")
     ax.set_ylabel("y [m]")
     ax.set_xlim([-1, 61])
