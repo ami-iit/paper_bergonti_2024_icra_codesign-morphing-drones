@@ -35,10 +35,10 @@ def get_patches_goals_and_obstacles(list_goals, list_obstacles):
             if polygon.intersects(obstacle):
                 polygon = polygon.difference(obstacle)
         goal_polygons.append(polygon)
+    for polygon in goal_polygons:
+        list_patches.append(plt.Polygon(list(polygon.exterior.coords), closed=True, fill=True, facecolor="g", alpha=0.15))
     for polygon in obstacles_polygons:
         list_patches.append(plt.Polygon(list(polygon.exterior.coords), closed=True, fill=True, color="r", alpha=0.15))
-    for polygon in goal_polygons:
-        list_patches.append(plt.Polygon(list(polygon.exterior.coords), closed=True, fill=True, color="g", alpha=0.15))
     return list_patches
 
 
@@ -515,4 +515,4 @@ if __name__ == "__main__":
     # select the task to be plotted (Figure 5 of the paper)
     index_task = 1  # From 0 to 5
 
-    plot_codesign(list_result_nsga, use_paper_optimal_drones, index_task, False)
+    plot_codesign(list_result_nsga, use_paper_optimal_drones, index_task, True)
