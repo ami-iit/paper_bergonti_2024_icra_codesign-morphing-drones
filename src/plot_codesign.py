@@ -39,7 +39,7 @@ def evaluate_optimal_pareto_front(list_result_nsga) -> tools.support.ParetoFront
     return pareto
 
 
-def select_four_nsga_drones(tag="") -> np.ndarray:
+def select_four_nsga_drones() -> np.ndarray:
     pareto = evaluate_optimal_pareto_front(list_result_nsga)
     fitness_first_front = np.array([chromo.fitness.values for chromo in pareto])
     N = len(fitness_first_front)
@@ -53,9 +53,9 @@ def select_four_nsga_drones(tag="") -> np.ndarray:
     for i in range(len(sel)):
         fullpath_model = create_urdf_model(pareto[sel[i]], overwrite=False)
         repo_tree = utils_muav.get_repository_tree(relative_path=True)
-        os.rename(f"{fullpath_model}.urdf", f"{repo_tree['urdf']}/drone_nsga_{tag}_{i+1}.urdf")
-        os.rename(f"{fullpath_model}.toml", f"{repo_tree['urdf']}/drone_nsga_{tag}_{i+1}.toml")
-        list_optimal_drones.append(f"drone_nsga_{tag}_{i+1}")
+        os.rename(f"{fullpath_model}.urdf", f"{repo_tree['urdf']}/drone_nsga_{i+1}.urdf")
+        os.rename(f"{fullpath_model}.toml", f"{repo_tree['urdf']}/drone_nsga_{i+1}.toml")
+        list_optimal_drones.append(f"drone_nsga_{i+1}")
     return list_optimal_drones
 
 
@@ -138,7 +138,7 @@ def plot_pareto_front(list_result_nsga, fitness, colors_drones, list_short_name,
     )
     # plt.title(f"Pareto Front")
     # set xlabel centered between subplots
-    ax1.set_xlim((65, 170))
+    ax1.set_xlim((62, 179))
     ax2.set_xlim((280, 320))
     ax2.set_xticks((280, 320))
     ax1.grid(color="0.9")

@@ -151,7 +151,7 @@ def solve_s_trajectory(
     )
 
 
-def run_validation(dict: Dict):
+def run_validation(dict: Dict, n_process: int = 8):
     str_date = utils_muav.get_date_str()
     Database_results("multiple_trajectories").create_empty_csv_database(
         columns=[
@@ -175,7 +175,7 @@ def run_validation(dict: Dict):
         ]
     )
     db_ff = Database_results(name_database="multiple_trajectories")
-    with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+    with multiprocessing.Pool(processes=n_process) as pool:
         pool.starmap(
             solve_s_trajectory,
             [
@@ -233,4 +233,4 @@ if __name__ == "__main__":
     validation_dict["ic_pitch"] = [-5, 0, 5]
     validation_dict["ic_yaw"] = [0]
 
-    run_validation(validation_dict)
+    run_validation(validation_dict, multiprocessing.cpu_count())

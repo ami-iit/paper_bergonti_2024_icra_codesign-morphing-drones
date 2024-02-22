@@ -9,24 +9,17 @@ def plot_validation(name_csv_database: str, savefig: bool = False) -> None:
     plt.rcParams["pdf.fonttype"] = 42
     plt.rcParams["ps.fonttype"] = 42
 
-    encoding = {
-        "bix3": 0,
-        "opt1": 1,
-        "opt2": 2,
-        "opt3": 3,
-        "opt4": 4,
-    }
-    list_encoding = ["bix3", "opt1", "opt2", "opt3", "opt4"]
+    list_drones = ["bix3", "opt1", "opt2", "opt3", "opt4"]
     list_color = ["tab:orange", "tab:blue", "tab:blue", "tab:blue", "tab:blue", "tab:green", "tab:green"]
     list_color = ["#D62728", "#FF7F0E", "#CBBF5F", "#15B7C3", "#2CA02C"]
 
-    for i in range(len(list_encoding) - 1, -1, -1):
-        if list(encoding.keys())[i] not in df["name_drone"].values:
-            list_encoding.pop(i)
+    for drone in list_drones:
+        if drone not in df["name_drone"].values:
+            list_drones.remove(drone)
 
     df["energy_normalized"] = df["energy"] / (2 * df["distance"])
     df["time_normalized"] = df["time"] / (2 * df["distance"])
-    df["drone_id"] = df["name_drone"].apply(lambda x: encoding[x])
+    df["drone_id"] = df["name_drone"].apply(lambda x: list_drones.index(x))
 
     time_decrease = (
         100
@@ -63,7 +56,7 @@ def plot_validation(name_csv_database: str, savefig: bool = False) -> None:
     )
     plt.gca().set(xlabel=None)
     plt.ylabel("[J/m]")
-    plt.xticks(np.arange(len(list_encoding)), list_encoding, rotation=0)
+    plt.xticks(np.arange(len(list_drones)), list_drones, rotation=0)
     plt.ylim(0, 6.5)
     plt.tight_layout()
     plt.grid(axis="y", color="0.9")
@@ -87,7 +80,7 @@ def plot_validation(name_csv_database: str, savefig: bool = False) -> None:
     )
     plt.gca().set(xlabel=None)
     plt.ylabel("[s/m]")
-    plt.xticks(np.arange(len(list_encoding)), list_encoding, rotation=0)
+    plt.xticks(np.arange(len(list_drones)), list_drones, rotation=0)
     plt.ylim(0.06, 0.155)
     plt.tight_layout()
     plt.grid(axis="y", color="0.9")
@@ -102,4 +95,4 @@ if __name__ == "__main__":
     # Script for plotting the results of `run_validation.py`
     # If you leave the code unchanged, it will plot the results from the paper (figure 9).
     # If you want to plot your own results, change the path to the CSV file.
-    plot_validation("result/mt_2024-02-01_11h38m14s.csv", True)
+    plot_validation("result/mt_2024-02-22_10h31m37s.csv", True)
