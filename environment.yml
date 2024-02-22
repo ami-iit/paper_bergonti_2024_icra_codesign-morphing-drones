@@ -29,11 +29,11 @@ dependencies:
   - bullet-cpp=3.21=h4661b88_4
   - bzip2=1.0.8=hd590300_5
   - c-ares=1.26.0=hd590300_0
-  - ca-certificates=2023.11.17=hbcca054_0
+  - ca-certificates=2024.2.2=hbcca054_0
   - cairo=1.16.0=ha61ee94_1014
   - casadi=3.6.2=py39h08b7280_2
   - catkin_pkg=0.5.2=pyhd8ed1ab_0
-  - certifi=2023.11.17=pyhd8ed1ab_0
+  - certifi=2024.2.2=pyhd8ed1ab_0
   - cffi=1.16.0=py39h7a31438_0
   - cfitsio=4.2.0=hd9d235c_0
   - chainer=7.8.1=pyhd8ed1ab_0
@@ -595,6 +595,7 @@ dependencies:
   - seaborn=0.12.2=hd8ed1ab_0
   - seaborn-base=0.12.2=pyhd8ed1ab_0
   - setuptools=69.0.3=pyhd8ed1ab_0
+  - shapely=2.0.1=py39hc9151fd_0
   - simbody=3.7=h64f3f5a_3
   - simde=0.7.6=h00ab1b0_0
   - sip=6.7.12=py39h3d6467e_0
@@ -623,10 +624,10 @@ dependencies:
   - tzdata=2023d=h0c530f3_0
   - unicodedata2=15.1.0=py39hd1e30aa_0
   - unixodbc=2.3.12=h661eb56_0
+  - urdf-parser-py=0.0.4=pyhd8ed1ab_0
   - urdfdom=3.1.1=h8a9b4ce_0
   - urdfdom-py=1.2.1=py39hf3d152e_3
   - urdfdom_headers=1.1.1=h00ab1b0_0
-  - urdf-parser-py=0.0.4=pyhd8ed1ab_0
   - uriparser=0.9.7=hcb278e6_1
   - urllib3=2.2.0=pyhd8ed1ab_0
   - utfcpp=4.0.5=ha770c72_0
