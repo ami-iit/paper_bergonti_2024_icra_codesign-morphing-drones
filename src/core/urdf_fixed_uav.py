@@ -262,7 +262,7 @@ if __name__ == "__main__":
     )
     drone["controller_parameters"] = Controller_Parameters_UAV()
     drone["name_robot"] = "drone"
-    drone["fullpath_model"] = f"{utils_muav.get_repository_tree(relative_path=True)['urdf']}/fixed_wing_drone_back"
+    drone["fullpath_model"] = f"{utils_muav.get_repository_tree(relative_path=True)['urdf']}/bix3"
     udg = URDF_fixed_wing(drone)
     udg.generate_urdf()
     udg.generate_toml()

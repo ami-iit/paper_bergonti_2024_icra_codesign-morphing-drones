@@ -484,14 +484,14 @@ def evaluate_drones(drones_to_be_evaluated):
 def plot_codesign(list_result_nsga: List[Dict], use_paper_optimal_drones: bool, index_task: int, save: bool):
     if use_paper_optimal_drones:
         list_optimal_drones = [
-            "drone_nsga_46295d0_1",  # opt1
-            "drone_nsga_46295d0_2",  # opt2
-            "drone_nsga_46295d0_3",  # opt3
-            "drone_nsga_46295d0_4",  # opt4
+            "opt1",
+            "opt2",
+            "opt3",
+            "opt4",
         ]
     else:
         list_optimal_drones = select_four_nsga_drones()
-    fitness, traj_specs, traj_state = evaluate_drones(["fixed_wing_drone_back"] + list_optimal_drones)
+    fitness, traj_specs, traj_state = evaluate_drones(["bix3"] + list_optimal_drones)
     drones_colors = ["#D62728", "#FF7F0E", "#CBBF5F", "#15B7C3", "#2CA02C"]
     list_short_name = ["bix3", "opt1", "opt2", "opt3", "opt4"]
     print_computational_time_nsga(list_result_nsga)
@@ -506,14 +506,15 @@ if __name__ == "__main__":
     # if you leave the code unchanged, it will plot the results of the paper (figures 5, 6, and 7).
     # if you want to plot your own results, change the path of the csv files in `list_result_nsga`
     list_result_nsga = [
-        {"pkl": "result/deap_2023-07-08_09h43m49s", "name": "A"},
-        {"pkl": "result/deap_2023-07-09_19h54m55s", "name": "B"},
-        {"pkl": "result/deap_2023-07-10_23h54m13s", "name": "C"},
-        {"pkl": "result/deap_2023-07-12_09h12m55s", "name": "D"},
-        {"pkl": "result/deap_2023-07-13_19h04m08s", "name": "E"},
-        {"pkl": "result/deap_2023-07-25_11h13m36s", "name": "F"},
-        {"pkl": "result/deap_2023-07-29_22h52m27s", "name": "G"},
-        {"pkl": "result/deap_2023-07-31_08h35m26s", "name": "H"},
+        {"pkl": "result/deap_2024-02-14_10h41m15s", "name": "A"},
+        {"pkl": "result/deap_2024-02-16_14h53m42s", "name": "B"},
+        {"pkl": "result/deap_2024-02-17_05h10m17s", "name": "C"},
+        {"pkl": "result/deap_2024-02-17_21h00m29s", "name": "D"},
+        {"pkl": "result/deap_2024-02-18_13h04m48s", "name": "E"},
+        {"pkl": "result/deap_2024-02-19_03h40m06s", "name": "F"},
+        {"pkl": "result/deap_2024-02-19_20h43m05s", "name": "G"},
+        {"pkl": "result/deap_2024-02-20_13h02m33s", "name": "H"},
+        {"pkl": "result/deap_2024-02-21_07h20m53s", "name": "I"},
     ]
 
     # Use the opt drones of the paper of choose randomly 4 drones from the pareto front

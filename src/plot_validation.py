@@ -10,11 +10,11 @@ def plot_validation(name_csv_database: str, savefig: bool = False) -> None:
     plt.rcParams["ps.fonttype"] = 42
 
     encoding = {
-        "fixed_wing_drone_back": 0,
-        "drone_nsga_46295d0_1": 1,
-        "drone_nsga_46295d0_2": 2,
-        "drone_nsga_46295d0_3": 3,
-        "drone_nsga_46295d0_4": 4,
+        "bix3": 0,
+        "opt1": 1,
+        "opt2": 2,
+        "opt3": 3,
+        "opt4": 4,
     }
     list_encoding = ["bix3", "opt1", "opt2", "opt3", "opt4"]
     list_color = ["tab:orange", "tab:blue", "tab:blue", "tab:blue", "tab:blue", "tab:green", "tab:green"]

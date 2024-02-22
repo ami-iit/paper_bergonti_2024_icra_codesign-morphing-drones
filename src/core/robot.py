@@ -188,7 +188,7 @@ class Robot:
         chord = self.aero_chord_list[aero_frame]
         wingspan = A / chord
 
-        if self.name == "fixed_wing_drone" or self.name == "fixed_wing_drone_back":
+        if self.name == "bix3":
             CL = self.aero_model_list[aero_frame]["CL"](alpha, beta, Vinf_norm, s)
             CD = self.aero_model_list[aero_frame]["CD"](alpha, beta, Vinf_norm, s)
             CY = self.aero_model_list[aero_frame]["CY"](alpha, beta, Vinf_norm, s)
@@ -482,7 +482,7 @@ class Robot:
 
 
 if __name__ == "__main__":
-    robot = Robot(f"{utils_muav.get_repository_tree(relative_path=True)['urdf']}/drone_nsga_46295d0_2")
+    robot = Robot(f"{utils_muav.get_repository_tree(relative_path=True)['urdf']}/opt2")
     posquat_w_b = np.concatenate(
         (
             np.array([0, 0, 0]).T,

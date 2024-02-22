@@ -1,0 +1,36 @@
+world = "world"
+root_link = "root_link"
+
+[joints]
+list = [ "joint_0__aileron_wing", "joint_0__rudder_wing", "joint_0__elevator_wing",]
+pos_limits_ub = [ 0.3490658503988659, 0.3490658503988659, 0.3490658503988659,]
+pos_limits_lb = [ -0.3490658503988659, -0.3490658503988659, -0.3490658503988659,]
+vel_limits_ub = [ 5.4, 5.4, 5.4,]
+acc_limits_ub = [ 8, 8, 8,]
+tor_limits_ub = [ 0.26, 0.26, 0.26,]
+dot_tor_limits_ub = [ 0.52, 0.52, 0.52,]
+servomotor_power_constants = [ [ 3.4, 2.15, 0.35,], [ 3.4, 2.15, 0.35,], [ 3.4, 2.15, 0.35,],]
+servomotor_viscous_friction = [ 0.0048, 0.0048, 0.0048,]
+
+[aerodynamics]
+list_frames = [ "aero_frame_fuselage",]
+list_model = [ "aerodynamics/database_aerodynamic_models/fixed_wing_fuselage_experiment.p",]
+cross_section = [ 0.276,]
+chord = [ 0.185,]
+alpha_limits_lb = [ -12,]
+alpha_limits_ub = [ 12,]
+beta_limits_lb = [ -30,]
+beta_limits_ub = [ 30,]
+
+[propellers]
+list_frames = [ "prop_frame_fuselage",]
+thrust_limits_ub = [ 6.142,]
+dot_thrust_limits_ub = [ 12.284,]
+coeff_thrust_to_power = [ [ 0.0, 22.36, 2.367,],]
+ratio_torque_thrust = [ 0.127,]
+
+[collisions]
+list_frames = [ "collision_frame_0", "collision_frame_1", "collision_frame_2", "collision_frame_3",]
+
+[controller_parameters]
+weight_time_energy = 10

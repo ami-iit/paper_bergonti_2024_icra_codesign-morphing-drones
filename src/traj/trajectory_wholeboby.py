@@ -406,7 +406,7 @@ class Trajectory_WholeBody_Planner(Trajectory):
 
 if __name__ == "__main__":
     t0 = time.time()
-    robot_name = "drone_nsga_46295d0_1"
+    robot_name = "opt1"
     robot = Robot(f"{utils_muav.get_repository_tree(relative_path=True)['urdf']}/{robot_name}")
     robot.set_joint_limit()
     robot.set_propeller_limit()

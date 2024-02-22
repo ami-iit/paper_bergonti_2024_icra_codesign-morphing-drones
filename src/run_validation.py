@@ -212,11 +212,11 @@ if __name__ == "__main__":
     validation_dict = {}
     # Drone names to be tested
     validation_dict["robot"] = [
-        "fixed_wing_drone_back",  # bix3
-        "drone_nsga_46295d0_1",  # opt1
-        "drone_nsga_46295d0_2",  # opt2
-        "drone_nsga_46295d0_3",  # opt3
-        "drone_nsga_46295d0_4",  # opt4
+        "bix3",  # bix3
+        "opt1",
+        "opt2",
+        "opt3",
+        "opt4",
     ]
     # List of distances to be tested (see Fig. 8 of the paper)
     validation_dict["goal_dist"] = [30, 40, 50]
