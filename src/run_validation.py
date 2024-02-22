@@ -212,7 +212,7 @@ if __name__ == "__main__":
     validation_dict = {}
     # Drone names to be tested
     validation_dict["robot"] = [
-        "bix3",  # bix3
+        "bix3",
         "opt1",
         "opt2",
         "opt3",
