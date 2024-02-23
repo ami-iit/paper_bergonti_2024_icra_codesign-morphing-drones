@@ -37,7 +37,9 @@ def get_patches_goals_and_obstacles(list_goals, list_obstacles):
                 polygon = polygon.difference(obstacle)
         goal_polygons.append(polygon)
     for polygon in goal_polygons:
-        list_patches.append(plt.Polygon(list(polygon.exterior.coords), closed=True, fill=True, facecolor="g", alpha=0.15))
+        list_patches.append(
+            plt.Polygon(list(polygon.exterior.coords), closed=True, fill=True, facecolor="g", alpha=0.15)
+        )
     for polygon in obstacles_polygons:
         list_patches.append(plt.Polygon(list(polygon.exterior.coords), closed=True, fill=True, color="r", alpha=0.15))
     return list_patches
@@ -194,13 +196,13 @@ def plot_pareto_front(list_result_nsga, fitness, colors_drones, list_short_name,
         plt.savefig("pareto_front.pdf")
 
 
-def plot_pareto_front_evolution_video(list_result_nsga, save: bool):
+def video_pareto_front_evolution(list_result_nsga, fitness, drones_colors, save: bool):
     plt.rcParams["pdf.fonttype"] = 42
     plt.rcParams["ps.fonttype"] = 42
     pal = list(mcolors.TABLEAU_COLORS) + sns.color_palette("Blues", 10)
     fig, ax1 = plt.subplots(1, 1, figsize=(3, 2), dpi=5000)
-    ax1.set_xlim((56.76203784720779, 316.3087760589073))
-    ax1.set_ylim((4.9087881235901545, 7.187344461696856))
+    ax1.set_xlim((56.7, 316.3))
+    ax1.set_ylim((4.9, 7.2))
     stats_deap = Stats_Codesign.load(list_result_nsga[0]["pkl"])
     gen = len(stats_deap.fitness_front[0]) - 1
     ax1.plot(stats_deap.fitness_front[0][gen], stats_deap.fitness_front[1][gen], c=pal[-0 - 1])
@@ -214,10 +216,9 @@ def plot_pareto_front_evolution_video(list_result_nsga, save: bool):
 
     fps = 4
     fig, ax1 = plt.subplots(1, 1, figsize=(8, 4.3), dpi=500)
-    pal = list(mcolors.TABLEAU_COLORS) + sns.color_palette("Blues", 10)
     ax1.grid(color="0.9")
-    ax1.set_xlim((56.76203784720779, 316.3087760589073))
-    ax1.set_ylim((4.9087881235901545, 7.187344461696856))
+    ax1.set_xlim((56.7, 316.3))
+    ax1.set_ylim((4.9, 7.2))
     ax1.set_xlabel("energy consumption [J]")
     ax1.set_ylabel("mission completion time [s]")
 
@@ -236,15 +237,19 @@ def plot_pareto_front_evolution_video(list_result_nsga, save: bool):
     for i, result_deap in enumerate(list_result_nsga):
         stats_deap = Stats_Codesign.load(result_deap["pkl"])
         gen = len(stats_deap.fitness_front[0]) - 1
-        pal = list(mcolors.TABLEAU_COLORS) + sns.color_palette("Blues", 10)
         ax1.plot(stats_deap.fitness_front[0][gen], stats_deap.fitness_front[1][gen], c=pal[-i - 1])
     ax1.grid(color="0.9")
-    ax1.set_xlim((56.76203784720779, 316.3087760589073))
-    ax1.set_ylim((4.9087881235901545, 7.187344461696856))
+    ax1.set_xlim((56.7, 316.3))
+    ax1.set_ylim((4.9, 7.2))
     ax1.set_xlabel("energy consumption [J]")
     ax1.set_ylabel("mission completion time [s]")
     if save:
         plt.savefig("pareto_front_video.png")
+
+    for fit, color in zip(fitness, drones_colors):
+        plt.plot(fit[0], fit[1], c=color, marker="o", linestyle="", markersize=4)
+    if save:
+        plt.savefig("pareto_front_video_markers.png")
 
 
 def plot_trajectories(traj_state, colors_drones, list_robot_name, save: bool):
@@ -427,7 +432,7 @@ def video_trajectories(traj_state, colors_drones, list_robot_name, save: bool):
     mark2 = [None] * len(list_robot_name)
     for i in range(len(list_robot_name)):
         mark2[i] = plt.plot(X[0, i], V[0, i], marker="o", color=colors_drones[i])[0]
-    ax.set_ylabel(r"$|| \dot{p}_B ||_2$ [m/s]")
+    ax.set_ylabel("speed [m/s]")  # ax.set_ylabel(r"$|| \dot{p}_B ||_2$ [m/s]")
     ax.set_xlabel("x [m]")
     ax.set_xlim([-1, 61])
     ax.grid(color="0.9")
@@ -490,6 +495,7 @@ def plot_codesign(list_result_nsga: List[Dict], use_paper_optimal_drones: bool, 
     list_short_name = ["bix3", "opt1", "opt2", "opt3", "opt4"]
     print_computational_time_nsga(list_result_nsga)
     plot_pareto_front(list_result_nsga, fitness, drones_colors, list_short_name, save)
+    video_pareto_front_evolution(list_result_nsga, fitness, drones_colors, save)
     plot_trajectories(traj_state[index_task], drones_colors, list_short_name, save)
     video_trajectories(traj_state[index_task], drones_colors, list_short_name, save)
     plt.show()
