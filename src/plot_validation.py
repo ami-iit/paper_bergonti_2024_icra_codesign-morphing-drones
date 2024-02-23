@@ -4,7 +4,7 @@ import numpy as np
 import seaborn as sns
 
 
-def plot_validation(name_csv_database: str, savefig: bool = False, images_icra_video: bool = False) -> None:
+def plot_validation(name_csv_database: str, savefig: bool = False, plots_icra_video: bool = False) -> None:
     df = pd.read_csv(name_csv_database)
     plt.rcParams["pdf.fonttype"] = 42
     plt.rcParams["ps.fonttype"] = 42
@@ -41,7 +41,7 @@ def plot_validation(name_csv_database: str, savefig: bool = False, images_icra_v
     print(f"energy decrease: {energy_decrease.min():.0f} - {energy_decrease.max():.0f}")
 
     # boxplot energy
-    if images_icra_video:
+    if plots_icra_video:
         plt.figure(figsize=(4.5, 4), dpi=600)
     else:
         plt.figure(figsize=(2.8, 2))
@@ -59,7 +59,7 @@ def plot_validation(name_csv_database: str, savefig: bool = False, images_icra_v
     )
     plt.gca().set(xlabel=None)
     plt.ylabel("[J/m]")
-    if images_icra_video:
+    if plots_icra_video:
         plt.title("energy consumption (normalised)")
     plt.xticks(np.arange(len(list_drones)), list_drones, rotation=0)
     plt.ylim(0, 6.5)
@@ -71,7 +71,7 @@ def plot_validation(name_csv_database: str, savefig: bool = False, images_icra_v
         plt.savefig("boxplot_energy_normalized.pdf", bbox_inches="tight")
     # boxplot time
     # boxplot energy
-    if images_icra_video:
+    if plots_icra_video:
         plt.figure(figsize=(4.5, 4), dpi=600)
     else:
         plt.figure(figsize=(2.8, 2))
@@ -89,7 +89,7 @@ def plot_validation(name_csv_database: str, savefig: bool = False, images_icra_v
     )
     plt.gca().set(xlabel=None)
     plt.ylabel("[s/m]")
-    if images_icra_video:
+    if plots_icra_video:
         plt.title("mission completion time (normalised)")
     plt.xticks(np.arange(len(list_drones)), list_drones, rotation=0)
     plt.ylim(0.06, 0.155)
@@ -106,4 +106,4 @@ if __name__ == "__main__":
     # Script for plotting the results of `run_validation.py`
     # If you leave the code unchanged, it will plot the results from the paper (figure 9).
     # If you want to plot your own results, change the path to the CSV file.
-    plot_validation("result/mt_2024-02-22_10h31m37s.csv", True, False)
+    plot_validation("result/mt_2024-02-22_10h31m37s.csv", True, True)

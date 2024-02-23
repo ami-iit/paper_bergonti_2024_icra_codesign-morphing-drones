@@ -355,9 +355,6 @@ def video_trajectories(traj_state, colors_drones, list_robot_name, save: bool):
     plt.rcParams["ps.fonttype"] = 42
 
     max_time = max(value["time"].max() for value in traj_state.values())
-    # increase tolerance of last goal for visualisation purpose
-    for key, value in traj_state.items():
-        value["constant"]["goals"][0].position["tol"] = value["constant"]["goals"][0].position["tol"] * 5
 
     fps = 60
     time = np.arange(0, max_time, 1 / 60)
@@ -480,7 +477,13 @@ def evaluate_drones(drones_to_be_evaluated):
     return fitness, traj_specs, traj_state
 
 
-def plot_codesign(list_result_nsga: List[Dict], use_paper_optimal_drones: bool, index_task: int, save: bool):
+def plot_codesign(
+    list_result_nsga: List[Dict],
+    use_paper_optimal_drones: bool,
+    index_task: int,
+    save: bool,
+    plots_icra_video: bool = False,
+):
     if use_paper_optimal_drones:
         list_optimal_drones = [
             "opt1",
@@ -495,9 +498,11 @@ def plot_codesign(list_result_nsga: List[Dict], use_paper_optimal_drones: bool, 
     list_short_name = ["bix3", "opt1", "opt2", "opt3", "opt4"]
     print_computational_time_nsga(list_result_nsga)
     plot_pareto_front(list_result_nsga, fitness, drones_colors, list_short_name, save)
-    video_pareto_front_evolution(list_result_nsga, fitness, drones_colors, save)
+    if plots_icra_video:
+        video_pareto_front_evolution(list_result_nsga, fitness, drones_colors, save)
     plot_trajectories(traj_state[index_task], drones_colors, list_short_name, save)
-    video_trajectories(traj_state[index_task], drones_colors, list_short_name, save)
+    if plots_icra_video:
+        video_trajectories(traj_state[index_task], drones_colors, list_short_name, save)
     plt.show()
 
 
@@ -523,4 +528,4 @@ if __name__ == "__main__":
     # select the task to be plotted (Figure 5 of the paper)
     index_task = 1  # From 0 to 5
 
-    plot_codesign(list_result_nsga, use_paper_optimal_drones, index_task, True)
+    plot_codesign(list_result_nsga, use_paper_optimal_drones, index_task, True, False)
