@@ -200,12 +200,12 @@ def video_pareto_front_evolution(list_result_nsga, fitness, drones_colors, save:
     plt.rcParams["pdf.fonttype"] = 42
     plt.rcParams["ps.fonttype"] = 42
     pal = list(mcolors.TABLEAU_COLORS) + sns.color_palette("Blues", 10)
-    fig, ax1 = plt.subplots(1, 1, figsize=(3, 2), dpi=5000)
+    fig, ax1 = plt.subplots(1, 1, figsize=(8, 4.3), dpi=500)
     ax1.set_xlim((56.7, 316.3))
     ax1.set_ylim((4.9, 7.2))
     stats_deap = Stats_Codesign.load(list_result_nsga[0]["pkl"])
     gen = len(stats_deap.fitness_front[0]) - 1
-    ax1.plot(stats_deap.fitness_front[0][gen], stats_deap.fitness_front[1][gen], c=pal[-0 - 1])
+    ax1.plot(stats_deap.fitness_front[0][gen], stats_deap.fitness_front[1][gen], c=pal[-0 - 1], linewidth=3)
     ax1.set_xlabel("energy consumption")
     ax1.set_ylabel("agility")
     ax1.set_xticklabels([])
