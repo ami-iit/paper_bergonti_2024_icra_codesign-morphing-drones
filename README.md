@@ -93,7 +93,7 @@ If you find the work useful, please consider citing:
 @article{bergonti2023co,
   title={Co-Design Optimisation of Morphing Topology and Control of Winged Drones},
   author={Bergonti, Fabio and Nava, Gabriele and W{\"u}est, Valentin and Paolino, Antonello and L'Erario, Giuseppe and Pucci, Daniele and Floreano, Dario},
-  booktitle={2014 International Conference on Robotics and Automation (ICRA)},
+  booktitle={2024 International Conference on Robotics and Automation (ICRA)},
   year={2024},
   organization={IEEE}
 }
