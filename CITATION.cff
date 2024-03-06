@@ -25,12 +25,10 @@ preferred-citation:
   - family-names: "Floreano"
     given-names: "Dario"
     orcid: "https://orcid.org/0000-0002-5330-4863"       
-  doi: "TODO"
-  journal: "TODO"
-  month: TODO
-  start: TODO # First page number
-  end: TODO # Last page number
+  # doi: "TODO"
+  journal: "2024 International Conference on Robotics and Automation (ICRA)"
+  month: 5
+  # start: TODO # First page number
+  # end: TODO # Last page number
   title: "Co-Design Optimisation of Morphing Topology and Control of Winged Drones"
-  issue: TODO
-  volume: TODO
-  year: TODO
+  year: 2024

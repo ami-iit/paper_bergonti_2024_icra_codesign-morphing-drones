@@ -48,7 +48,7 @@ class Trajectory:
         solvSettings = {
             "print_level": 0,
             "sb": "yes",
-            "linear_solver": "mumps",
+            "linear_solver": "numps",  # set "ma27" to reproduce paper results
             "nlp_scaling_max_gradient": 100.0,
             "nlp_scaling_min_value": 1e-6,
             "tol": 1e-3,
@@ -495,7 +495,8 @@ class Trajectory:
         if os.path.exists(folder_name) is False:
             os.mkdir(folder_name)
         name = f"{folder_name}/{self.robot.name}-{utils_muav.get_date_str()}"
-        pickle.dump({"out": out}, open(name + ".p", "wb"))
+        with open(name + ".p", "wb") as f:
+            pickle.dump({"out": out}, f)
         self._project_status.create_report(name)
         self.name_trajectory = name
         return out
@@ -525,7 +526,8 @@ class Trajectory:
         for i in range(N):
             list_obstacles.append(Obstacle_InfiniteCylinder(xy=[x[i], y[i]], r=r[i]))
         if savedir is not None:
-            pickle.dump(list_obstacles, open(f"{savedir}_{seed}.p", "wb"))
+            with open(f"{savedir}_{seed}.p", "wb") as f:
+                pickle.dump(list_obstacles, f)
         if plot:
             plt.figure()
             for i in range(N):
@@ -695,7 +697,8 @@ class Task:
 
     def save(self) -> "Task":
         name = f"{utils_muav.get_repository_tree()['pickle_codesign_tasks']}/{self.name}.p"
-        pickle.dump(self.out, open(name, "wb"))
+        with open(name, "wb") as f:
+            pickle.dump(self.out, f)
         print(f"Task saved to {name}")
         return self
 
@@ -740,7 +743,7 @@ class Task:
         distance_obstacle_goal = distance_start_obstacle
         distance_obstacle_obstacle = distance_start_obstacle
         distance_start_goal = distance_start_obstacle + distance_obstacle_obstacle + distance_obstacle_goal
-        radius_hidden_goals = distance_start_obstacle * 2 / 3
+        radius_hidden_goals = obstacles_radius
         knots = distance_start_goal + 30
 
         task = Task(
@@ -751,14 +754,14 @@ class Task:
                 .set_position(xyz=[distance_start_goal, 0, 0], isStrict=True, param=0.1)
                 .set_linearVelocity(xyz=final_velocity, isStrict=True, param=0.1),
                 Goal(index=int(knots * 1 / 3)).set_position(
-                    xyz=[distance_obstacle_goal, radius_hidden_goals, 0],
+                    xyz=[distance_obstacle_goal, obstacles_radius * 0.5 + radius_hidden_goals, 0],
                     isStrict=True,
                     param=radius_hidden_goals,
                 ),
                 Goal(index=int(knots * 2 / 3)).set_position(
                     xyz=[
                         distance_obstacle_goal + distance_obstacle_obstacle,
-                        -radius_hidden_goals,
+                        -obstacles_radius * 0.5 - radius_hidden_goals,
                         0,
                     ],
                     isStrict=True,

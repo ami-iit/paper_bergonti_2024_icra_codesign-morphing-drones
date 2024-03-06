@@ -36,6 +36,7 @@ class Servomotor:
         self._speed_limit = self.no_load_speed__rpm * (2 * math.pi / 60) * 0.5
         self._lb_position = -np.deg2rad(self.range_of_motion__deg / 2)
         self._ub_position = +np.deg2rad(self.range_of_motion__deg / 2)
+        self._viscous_friction__Nms = (0.1 * self._torque_limit) / self._speed_limit
         self._url = self.url
 
     def write_to_db(self, name_csv: str) -> None:
@@ -55,6 +56,7 @@ class Servomotor:
             + f"{self._torque_limit},"
             + f"{self._speed_limit},"
             + f"{self._lb_position},{self._ub_position},"
+            + f"{self._viscous_friction__Nms},"
             + f"{self._url}"
         )
         with open(name_csv, "a") as f:
@@ -74,6 +76,7 @@ def create_empty_db(name_csv: str) -> None:
         + "torque_limit,"
         + "speed_limit,"
         + "lb_position,ub_position,"
+        + "viscous_friction,"
         + "url"
     )
     with open(name_csv, "w") as f:

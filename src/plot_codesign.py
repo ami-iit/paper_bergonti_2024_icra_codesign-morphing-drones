@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.colors as mcolors
 from deap import creator, base, tools
-from codesign.urdf_chromosome_uav import Chromosome_Drone, create_urdf_model, Gene_Weight_Time_Energy
+from codesign.urdf_chromosome_uav import Chromosome_Drone, create_urdf_model
 import os
 import utils_muav
 from codesign.codesign_deap import Codesign_DEAP
@@ -11,11 +11,38 @@ from core.robot import Robot
 from traj.trajectory import Gains_Trajectory, Postprocess, Obstacle_Plane
 from traj.trajectory_wholeboby import Trajectory_WholeBody_Planner
 import pandas as pd
-from core.robot import Robot
 import seaborn as sns
 from matplotlib.animation import FuncAnimation
 import multiprocessing
 from typing import List, Dict
+import shapely
+
+
+def get_patches_goals_and_obstacles(list_goals, list_obstacles):
+    obstacles_polygons = []
+    goal_polygons = []
+    list_patches = []
+    for obstacle in list_obstacles:
+        if type(obstacle) != Obstacle_Plane:
+            obstacles_polygons.append(shapely.Point(obstacle.xy[0], obstacle.xy[1]).buffer(obstacle.r))
+    for goal in list_goals:
+        polygon = shapely.box(
+            goal.position["value"][0] - goal.position["tol"],
+            goal.position["value"][1] - goal.position["tol"],
+            goal.position["value"][0] + goal.position["tol"],
+            goal.position["value"][1] + goal.position["tol"],
+        )
+        for obstacle in obstacles_polygons:
+            if polygon.intersects(obstacle):
+                polygon = polygon.difference(obstacle)
+        goal_polygons.append(polygon)
+    for polygon in goal_polygons:
+        list_patches.append(
+            plt.Polygon(list(polygon.exterior.coords), closed=True, fill=True, facecolor="g", alpha=0.15)
+        )
+    for polygon in obstacles_polygons:
+        list_patches.append(plt.Polygon(list(polygon.exterior.coords), closed=True, fill=True, color="r", alpha=0.15))
+    return list_patches
 
 
 def evaluate_optimal_pareto_front(list_result_nsga) -> tools.support.ParetoFront:
@@ -40,7 +67,7 @@ def evaluate_optimal_pareto_front(list_result_nsga) -> tools.support.ParetoFront
     return pareto
 
 
-def select_four_nsga_drones(tag="") -> np.ndarray:
+def select_four_nsga_drones() -> np.ndarray:
     pareto = evaluate_optimal_pareto_front(list_result_nsga)
     fitness_first_front = np.array([chromo.fitness.values for chromo in pareto])
     N = len(fitness_first_front)
@@ -54,9 +81,9 @@ def select_four_nsga_drones(tag="") -> np.ndarray:
     for i in range(len(sel)):
         fullpath_model = create_urdf_model(pareto[sel[i]], overwrite=False)
         repo_tree = utils_muav.get_repository_tree(relative_path=True)
-        os.rename(f"{fullpath_model}.urdf", f"{repo_tree['urdf']}/drone_nsga_{tag}_{i+1}.urdf")
-        os.rename(f"{fullpath_model}.toml", f"{repo_tree['urdf']}/drone_nsga_{tag}_{i+1}.toml")
-        list_optimal_drones.append(f"drone_nsga_{tag}_{i+1}")
+        os.rename(f"{fullpath_model}.urdf", f"{repo_tree['urdf']}/drone_nsga_{i+1}.urdf")
+        os.rename(f"{fullpath_model}.toml", f"{repo_tree['urdf']}/drone_nsga_{i+1}.toml")
+        list_optimal_drones.append(f"drone_nsga_{i+1}")
     return list_optimal_drones
 
 
@@ -139,7 +166,7 @@ def plot_pareto_front(list_result_nsga, fitness, colors_drones, list_short_name,
     )
     # plt.title(f"Pareto Front")
     # set xlabel centered between subplots
-    ax1.set_xlim((65, 170))
+    ax1.set_xlim((62, 179))
     ax2.set_xlim((280, 320))
     ax2.set_xticks((280, 320))
     ax1.grid(color="0.9")
@@ -169,16 +196,16 @@ def plot_pareto_front(list_result_nsga, fitness, colors_drones, list_short_name,
         plt.savefig("pareto_front.pdf")
 
 
-def plot_pareto_front_evolution_video(list_result_nsga, save: bool):
+def video_pareto_front_evolution(list_result_nsga, fitness, drones_colors, save: bool):
     plt.rcParams["pdf.fonttype"] = 42
     plt.rcParams["ps.fonttype"] = 42
     pal = list(mcolors.TABLEAU_COLORS) + sns.color_palette("Blues", 10)
-    fig, ax1 = plt.subplots(1, 1, figsize=(3, 2), dpi=5000)
-    ax1.set_xlim((56.76203784720779, 316.3087760589073))
-    ax1.set_ylim((4.9087881235901545, 7.187344461696856))
+    fig, ax1 = plt.subplots(1, 1, figsize=(8, 4.3), dpi=500)
+    ax1.set_xlim((56.7, 316.3))
+    ax1.set_ylim((4.9, 7.2))
     stats_deap = Stats_Codesign.load(list_result_nsga[0]["pkl"])
     gen = len(stats_deap.fitness_front[0]) - 1
-    ax1.plot(stats_deap.fitness_front[0][gen], stats_deap.fitness_front[1][gen], c=pal[-0 - 1])
+    ax1.plot(stats_deap.fitness_front[0][gen], stats_deap.fitness_front[1][gen], c=pal[-0 - 1], linewidth=3)
     ax1.set_xlabel("energy consumption")
     ax1.set_ylabel("agility")
     ax1.set_xticklabels([])
@@ -189,10 +216,9 @@ def plot_pareto_front_evolution_video(list_result_nsga, save: bool):
 
     fps = 4
     fig, ax1 = plt.subplots(1, 1, figsize=(8, 4.3), dpi=500)
-    pal = list(mcolors.TABLEAU_COLORS) + sns.color_palette("Blues", 10)
     ax1.grid(color="0.9")
-    ax1.set_xlim((56.76203784720779, 316.3087760589073))
-    ax1.set_ylim((4.9087881235901545, 7.187344461696856))
+    ax1.set_xlim((56.7, 316.3))
+    ax1.set_ylim((4.9, 7.2))
     ax1.set_xlabel("energy consumption [J]")
     ax1.set_ylabel("mission completion time [s]")
 
@@ -211,15 +237,19 @@ def plot_pareto_front_evolution_video(list_result_nsga, save: bool):
     for i, result_deap in enumerate(list_result_nsga):
         stats_deap = Stats_Codesign.load(result_deap["pkl"])
         gen = len(stats_deap.fitness_front[0]) - 1
-        pal = list(mcolors.TABLEAU_COLORS) + sns.color_palette("Blues", 10)
         ax1.plot(stats_deap.fitness_front[0][gen], stats_deap.fitness_front[1][gen], c=pal[-i - 1])
     ax1.grid(color="0.9")
-    ax1.set_xlim((56.76203784720779, 316.3087760589073))
-    ax1.set_ylim((4.9087881235901545, 7.187344461696856))
+    ax1.set_xlim((56.7, 316.3))
+    ax1.set_ylim((4.9, 7.2))
     ax1.set_xlabel("energy consumption [J]")
     ax1.set_ylabel("mission completion time [s]")
     if save:
         plt.savefig("pareto_front_video.png")
+
+    for fit, color in zip(fitness, drones_colors):
+        plt.plot(fit[0], fit[1], c=color, marker="o", linestyle="", markersize=4)
+    if save:
+        plt.savefig("pareto_front_video_markers.png")
 
 
 def plot_trajectories(traj_state, colors_drones, list_robot_name, save: bool):
@@ -232,38 +262,6 @@ def plot_trajectories(traj_state, colors_drones, list_robot_name, save: bool):
 
     fig = plt.figure(figsize=(10, 2.1))
     ax1 = fig.add_subplot(111)
-
-    i = 0
-    for key, value in traj_state.items():
-        ax1.plot(
-            value["optivar"]["pos_w_b"][0, :],
-            value["optivar"]["pos_w_b"][1, :],
-            label=list_robot_name[i],
-            linewidth=0.8,
-            color=colors_drones[i],
-        )
-        i += 1
-    ax1.plot(0, 0, marker="o", color="tab:blue")
-    for goal in [next(iter(traj_state.values()))["constant"]["goals"][0]]:
-        goal.plot_xy()
-    for obstacle in next(iter(traj_state.values()))["constant"]["obstacles"]:
-        if type(obstacle) != Obstacle_Plane:
-            obstacle.plot_xy()
-    plt.legend(list_robot_name, loc="upper right", bbox_to_anchor=(0.8, 1))
-    ax1.set_xlabel("x [m]")
-    ax1.set_ylabel("y [m]")
-    ax1.set_ylim([-4.9, 4.7])
-    ax1.grid(color="0.9")
-    ax1.set_axisbelow(True)
-    ax1.set_xlim([-1, 61])
-    ax1.set_aspect("equal")
-    plt.tight_layout()
-    if save:
-        plt.savefig("trajs_xy.png", bbox_inches="tight")
-        plt.savefig("trajs_xy.pdf", transparent=True, bbox_inches="tight")
-
-    fig = plt.figure(figsize=(10, 2.1))
-    ax1 = fig.add_subplot(111)
     i = 0
     for key, value in traj_state.items():
         ax1.plot(
@@ -276,11 +274,11 @@ def plot_trajectories(traj_state, colors_drones, list_robot_name, save: bool):
         i += 1
     ax1.plot(0, 0, marker="o", color="tab:blue")
 
-    for goal in next(iter(traj_state.values()))["constant"]["goals"]:
-        goal.plot_xy(ax=ax1)
-    for obstacle in next(iter(traj_state.values()))["constant"]["obstacles"]:
-        if type(obstacle) != Obstacle_Plane:
-            obstacle.plot_xy(ax=ax1)
+    patches_goals_and_obstacles = get_patches_goals_and_obstacles(
+        next(iter(traj_state.values()))["constant"]["goals"], next(iter(traj_state.values()))["constant"]["obstacles"]
+    )
+    for patch in patches_goals_and_obstacles:
+        ax1.add_patch(patch)
     plt.legend(list_robot_name, loc="upper right", bbox_to_anchor=(0.8, 1))
     ax1.set_xlabel("x [m]")
     ax1.set_ylabel("y [m]")
@@ -303,11 +301,11 @@ def plot_trajectories(traj_state, colors_drones, list_robot_name, save: bool):
         )
         i += 1
     axins.plot(0, 0, marker="o", color="tab:blue")
-    for goal in next(iter(traj_state.values()))["constant"]["goals"]:
-        goal.plot_xy(ax=axins)
-    for obstacle in next(iter(traj_state.values()))["constant"]["obstacles"]:
-        if type(obstacle) != Obstacle_Plane:
-            obstacle.plot_xy(ax=axins)
+    patches_goals_and_obstacles = get_patches_goals_and_obstacles(
+        next(iter(traj_state.values()))["constant"]["goals"], next(iter(traj_state.values()))["constant"]["obstacles"]
+    )
+    for patch in patches_goals_and_obstacles:
+        axins.add_patch(patch)
     # ax1.set_ylim([-4.9, 4.7])
     # axins.grid(color="0.9")
     axins.set_xlim([17.5, 22])
@@ -357,9 +355,6 @@ def video_trajectories(traj_state, colors_drones, list_robot_name, save: bool):
     plt.rcParams["ps.fonttype"] = 42
 
     max_time = max(value["time"].max() for value in traj_state.values())
-    # increase tolerance of last goal for visualisation purpose
-    for key, value in traj_state.items():
-        value["constant"]["goals"][0].position["tol"] = value["constant"]["goals"][0].position["tol"] * 5
 
     fps = 60
     time = np.arange(0, max_time, 1 / 60)
@@ -395,11 +390,11 @@ def video_trajectories(traj_state, colors_drones, list_robot_name, save: bool):
     for i in range(len(list_robot_name)):
         mark[i] = plt.plot(X[0, i], Y[0, i], marker="o", color=colors_drones[i])[0]
     ax.plot(0, 0, marker="o", color="tab:blue")
-    for goal in next(iter(traj_state.values()))["constant"]["goals"]:
-        goal.plot_xy(ax=ax)
-    for obstacle in next(iter(traj_state.values()))["constant"]["obstacles"]:
-        if type(obstacle) != Obstacle_Plane:
-            obstacle.plot_xy(ax=ax)
+    patches_goals_and_obstacles = get_patches_goals_and_obstacles(
+        next(iter(traj_state.values()))["constant"]["goals"], next(iter(traj_state.values()))["constant"]["obstacles"]
+    )
+    for patch in patches_goals_and_obstacles:
+        ax.add_patch(patch)
     ax.set_xlabel("x [m]")
     ax.set_ylabel("y [m]")
     ax.set_xlim([-1, 61])
@@ -434,7 +429,7 @@ def video_trajectories(traj_state, colors_drones, list_robot_name, save: bool):
     mark2 = [None] * len(list_robot_name)
     for i in range(len(list_robot_name)):
         mark2[i] = plt.plot(X[0, i], V[0, i], marker="o", color=colors_drones[i])[0]
-    ax.set_ylabel(r"$|| \dot{p}_B ||_2$ [m/s]")
+    ax.set_ylabel("speed [m/s]")  # ax.set_ylabel(r"$|| \dot{p}_B ||_2$ [m/s]")
     ax.set_xlabel("x [m]")
     ax.set_xlim([-1, 61])
     ax.grid(color="0.9")
@@ -469,7 +464,7 @@ def evaluate_drones(drones_to_be_evaluated):
         fullpath_model = f"{utils_muav.get_repository_tree(relative_path=True)['urdf']}/{drone_name}"
         with multiprocessing.Pool(processes=n_tasks) as pool:
             output_map = pool.starmap(
-                Codesign_DEAP.solve_trajectory,
+                Trajectory_WholeBody_Planner.solve_task,
                 [(fullpath_model, task, f"result") for task in Codesign_DEAP.get_scenarios()],
             )
         temp_traj_name = [t[0] for t in output_map]
@@ -482,23 +477,216 @@ def evaluate_drones(drones_to_be_evaluated):
     return fitness, traj_specs, traj_state
 
 
-def plot_codesign(list_result_nsga: List[Dict], use_paper_optimal_drones: bool, index_task: int, save: bool):
+def study_genes_variability(list_result_nsga):
+    # plot genes
+    df = pd.read_csv(f'{utils_muav.get_repository_tree()["database_servomotor"]}/db_servomotor.csv')
+    df["torque_limit"]
+    df["speed_limit"]
+    pop_paretos = {0: [], 1: [], 2: [], 3: []}
+    robot_param = {"mass": {0: [], 1: [], 2: [], 3: []}, "com": {0: [], 1: [], 2: [], 3: []}}
+    servo_param = {"torque": {0: [], 1: [], 2: [], 3: []}, "speed": {0: [], 1: [], 2: [], 3: []}}
+    for name_result_deap in list_result_nsga:
+        stats_deap = Stats_Codesign.load(name_result_deap["pkl"])
+        for chromo, fit0, fit1 in zip(
+            stats_deap.populations_front[-1], stats_deap.fitness_front[0][-1], stats_deap.fitness_front[1][-1]
+        ):
+            robot = Robot(create_urdf_model(chromo, overwrite=True))
+            mass = robot.kinDyn.get_total_mass()
+            com = robot.kinDyn.CoM_position_fun()(np.eye(4), np.zeros(robot.ndofs)).full().flatten()
+            motor_torque = [np.nan, np.nan, np.nan, np.nan]
+            motor_speed = [np.nan, np.nan, np.nan, np.nan]
+            for i in range(3):
+                motor_speed[chromo[9 + 2 * i]] = df[df["id"] == chromo[10 + 2 * i]]["speed_limit"].values[0]
+                motor_torque[chromo[9 + 2 * i]] = df[df["id"] == chromo[10 + 2 * i]]["torque_limit"].values[0]
+            if fit0 < 85:
+                pop_paretos[1].append(chromo)
+                robot_param["mass"][1].append(mass)
+                robot_param["com"][1].append(com)
+                servo_param["torque"][1].append(motor_torque)
+                servo_param["speed"][1].append(motor_speed)
+            elif fit0 < 105:
+                pop_paretos[2].append(chromo)
+                robot_param["mass"][2].append(mass)
+                robot_param["com"][2].append(com)
+                servo_param["torque"][2].append(motor_torque)
+                servo_param["speed"][2].append(motor_speed)
+            else:
+                pop_paretos[3].append(chromo)
+                robot_param["mass"][3].append(mass)
+                robot_param["com"][3].append(com)
+                servo_param["torque"][3].append(motor_torque)
+                servo_param["speed"][3].append(motor_speed)
+            pop_paretos[0].append(chromo)
+            robot_param["mass"][0].append(mass)
+            robot_param["com"][0].append(com)
+            servo_param["torque"][0].append(motor_torque)
+            servo_param["speed"][0].append(motor_speed)
+    ngr = len(pop_paretos)
+    for i in range(ngr):
+        pop_paretos[i] = np.array(pop_paretos[i])
+        robot_param["mass"][i] = np.array(robot_param["mass"][i])
+        robot_param["com"][i] = np.array(robot_param["com"][i])
+        servo_param["torque"][i] = np.array(servo_param["torque"][i])
+        servo_param["speed"][i] = np.array(servo_param["speed"][i])
+
+    from codesign.urdf_chromosome_uav import Gene_Weight_Time_Energy
+
+    df = pd.read_csv(f'{utils_muav.get_repository_tree()["database_propeller"]}/db_propeller.csv')
+    enum_param = {"prop": {0: [], 1: [], 2: [], 3: []}, "contr": {0: [], 1: [], 2: [], 3: []}}
+    for i in range(ngr):
+        enum_param["prop"][i] = [df[df["id"] == j]["max_thrust"].values[0] for j in list(pop_paretos[i][:, 19])]
+        enum_param["contr"][i] = [
+            Gene_Weight_Time_Energy().get_list_possible_values()[int(j)] for j in list(pop_paretos[i][:, 20])
+        ]
+    print(
+        "prop thrust"
+        + f" \t | all: {np.mean(enum_param['prop'][0]):.3f}±{np.std(enum_param['prop'][0]):.3f}"
+        + f' \t | slow: {np.mean(enum_param["prop"][1]):.3f}±{np.std(enum_param["prop"][1]):.3f}'
+        + f' \t | int: {np.mean(enum_param["prop"][2]):.3f}±{np.std(enum_param["prop"][2]):.3f}'
+        + f' \t | fast: {np.mean(enum_param["prop"][3]):.3f}±{np.std(enum_param["prop"][3]):.3f}'
+    )
+    print(
+        "controller weight"
+        + f" \t | all: {np.mean(enum_param['contr'][0]):.3f}±{np.std(enum_param['contr'][0]):.3f}"
+        + f' \t | slow: {np.mean(enum_param["contr"][1]):.3f}±{np.std(enum_param["contr"][1]):.3f}'
+        + f' \t | int: {np.mean(enum_param["contr"][2]):.3f}±{np.std(enum_param["contr"][2]):.3f}'
+        + f' \t | fast: {np.mean(enum_param["contr"][3]):.3f}±{np.std(enum_param["contr"][3]):.3f}'
+    )
+
+    list_plt_details = [
+        {"idx": 0, "ylabel": "position [m]", "title": "wing horizontal location", "figsize": (6 * 16 / 9, 6)},
+        {"idx": 2, "ylabel": "position [m]", "title": "wing vertical location", "figsize": (6 * 16 / 9, 6)},
+        {"idx": 3, "ylabel": "angle [deg]", "title": "wing dihedral angle (roll)", "figsize": (6 * 16 / 9, 6)},
+        {"idx": 4, "ylabel": "angle [deg]", "title": "wing incidence angle (pitch)", "figsize": (6 * 16 / 9, 6)},
+        {"idx": 5, "ylabel": "angle [deg]", "title": "wing sweep angle (yaw)", "figsize": (6 * 16 / 9, 6)},
+        {"idx": 7, "ylabel": "length [m]", "title": "wing chord", "figsize": (6 * 16 / 9, 6)},
+        {"idx": 8, "ylabel": "length [m]", "title": "wing aspect ratio", "figsize": (6 * 16 / 9, 6)},
+        {"idx": 19, "ylabel": "[]", "title": "propeller model", "figsize": (6 * 16 / 9, 6)},
+        {"idx": 20, "ylabel": "[]", "title": "controller gain", "figsize": (6 * 16 / 9, 6)},
+    ]
+    for plt_details in list_plt_details:
+        print(
+            f'{plt_details["title"]} '
+            + f" \t | range: [{Chromosome_Drone().min()[plt_details['idx']]:.3f},{Chromosome_Drone().max()[plt_details['idx']]:.3f}]"
+            + f' \t | all: {np.mean(pop_paretos[0][:, plt_details["idx"]]):.3f}±{np.std(pop_paretos[0][:, plt_details["idx"]]):.3f}'
+            + f' \t | slow: {np.mean(pop_paretos[1][:, plt_details["idx"]]):.3f}±{np.std(pop_paretos[1][:, plt_details["idx"]]):.3f}'
+            + f' \t | int: {np.mean(pop_paretos[2][:, plt_details["idx"]]):.3f}±{np.std(pop_paretos[2][:, plt_details["idx"]]):.3f}'
+            + f' \t | fast: {np.mean(pop_paretos[3][:, plt_details["idx"]]):.3f}±{np.std(pop_paretos[3][:, plt_details["idx"]]):.3f}'
+        )
+        plt.figure(figsize=plt_details["figsize"])
+        plt.boxplot([pop_paretos[i][:, plt_details["idx"]] for i in range(ngr)], patch_artist=True)
+        plt.ylim([Chromosome_Drone().min()[plt_details["idx"]], Chromosome_Drone().max()[plt_details["idx"]]])
+        plt.ylabel(plt_details["ylabel"])
+        plt.title(plt_details["title"])
+        plt.savefig(f"gene_{plt_details['idx']}.png")
+    # mass
+    plt.figure(figsize=(6 * 16 / 9, 6))
+    plt.boxplot([robot_param["mass"][i] for i in range(ngr)], patch_artist=True)
+    plt.ylabel("mass [kg]")
+    plt.title("mass")
+    plt.savefig("gene_mass.png")
+    print(
+        "mass"
+        + f" \t | all: {np.mean(robot_param['mass'][0]):.3f}±{np.std(robot_param['mass'][0]):.3f}"
+        + f' \t | slow: {np.mean(robot_param["mass"][1]):.3f}±{np.std(robot_param["mass"][1]):.3f}'
+        + f' \t | int: {np.mean(robot_param["mass"][2]):.3f}±{np.std(robot_param["mass"][2]):.3f}'
+        + f' \t | fast: {np.mean(robot_param["mass"][3]):.3f}±{np.std(robot_param["mass"][3]):.3f}'
+    )
+    # com
+    for i in range(3):
+        plt.figure(figsize=(6 * 16 / 9, 6))
+        plt.boxplot([robot_param["com"][j][:, i] for j in range(ngr)], patch_artist=True)
+        plt.ylabel("position [m]")
+        plt.title(f"com - {['x','y','z'][i]}")
+        plt.savefig(f"gene_com_{i}.png")
+        print(
+            f"com - {['x','y','z'][i]} "
+            + f" \t | all: {np.mean(robot_param['com'][0][:, i]):.3f}±{np.std(robot_param['com'][0][:, i]):.3f}"
+            + f' \t | slow: {np.mean(robot_param["com"][1][:, i]):.3f}±{np.std(robot_param["com"][1][:, i]):.3f}'
+            + f' \t | int: {np.mean(robot_param["com"][2][:, i]):.3f}±{np.std(robot_param["com"][2][:, i]):.3f}'
+            + f' \t | fast: {np.mean(robot_param["com"][3][:, i]):.3f}±{np.std(robot_param["com"][3][:, i]):.3f}'
+        )
+    # motor torque
+    for i, name in zip(range(1, 4), ["dihedral", "sweep", "twist"]):
+        plt.figure(figsize=(6 * 16 / 9, 6))
+        plt.boxplot([servo_param["torque"][j][:, i] for j in range(ngr)], patch_artist=True)
+        plt.ylabel("torque [Nm]")
+        plt.title(f"motor - {name}")
+        plt.savefig(f"gene_motor_torque_{name}.png")
+        print(
+            f"motor torque - {name} "
+            + f" \t | all: {np.nanmean(servo_param['torque'][0][:, i]):.3f}±{np.nanstd(servo_param['torque'][0][:, i]):.3f}"
+            + f' \t | slow: {np.nanmean(servo_param["torque"][1][:, i]):.3f}±{np.nanstd(servo_param["torque"][1][:, i]):.3f}'
+            + f' \t | int: {np.nanmean(servo_param["torque"][2][:, i]):.3f}±{np.nanstd(servo_param["torque"][2][:, i]):.3f}'
+            + f' \t | fast: {np.nanmean(servo_param["torque"][3][:, i]):.3f}±{np.nanstd(servo_param["torque"][3][:, i]):.3f}'
+        )
+    # motor speed
+    for i, name in zip(range(1, 4), ["dihedral", "sweep", "twist"]):
+        plt.figure(figsize=(6 * 16 / 9, 6))
+        plt.boxplot([servo_param["speed"][j][:, i] for j in range(ngr)], patch_artist=True)
+        plt.ylabel("speed [rad/s]")
+        plt.title(f"motor speed - {name}")
+        plt.savefig(f"gene_motor_speed_{name}.png")
+        print(
+            f"motor speed - {name} "
+            + f" \t | all: {np.nanmean(servo_param['speed'][0][:, i]):.3f}±{np.nanstd(servo_param['speed'][0][:, i]):.3f}"
+            + f' \t | slow: {np.nanmean(servo_param["speed"][1][:, i]):.3f}±{np.nanstd(servo_param["speed"][1][:, i]):.3f}'
+            + f' \t | int: {np.nanmean(servo_param["speed"][2][:, i]):.3f}±{np.nanstd(servo_param["speed"][2][:, i]):.3f}'
+            + f' \t | fast: {np.nanmean(servo_param["speed"][3][:, i]):.3f}±{np.nanstd(servo_param["speed"][3][:, i]):.3f}'
+        )
+
+    plt.figure(figsize=(6 * 16 / 9, 6))
+    for i in range(ngr):
+        plt.subplot(1, ngr, i + 1)
+        unq, cnt = np.unique(pop_paretos[i][:, [9, 11, 13]], return_counts=True, axis=0)
+        plt.pie(cnt, labels=unq, autopct="%1.1f%%")
+    plt.savefig("gene_joint.png")
+
+    pop_paretos = []
+    for name_result_deap in list_result_nsga:
+        stats_deap = Stats_Codesign.load(name_result_deap["pkl"])
+        pop_paretos = pop_paretos + stats_deap.populations_front[-1]
+    pop_paretos = np.array(pop_paretos)
+
+    max_value = np.array(Chromosome_Drone().max())
+    min_value = np.array(Chromosome_Drone().min())
+    rang = max_value - min_value
+    rang[rang == 0] = 1
+    chromosomes_scaled = (pop_paretos - min_value) / rang
+    plt.figure(figsize=(6 * 16 / 9, 6))
+    plt.boxplot(chromosomes_scaled, patch_artist=True)
+    plt.title("unique chromosomes")
+    plt.xlabel("Generation")
+    plt.ylabel("unique chromosomes")
+    plt.savefig("gene_paretos.png")
+
+
+def plot_codesign(
+    list_result_nsga: List[Dict],
+    use_paper_optimal_drones: bool,
+    index_task: int,
+    save: bool,
+    plots_icra_video: bool = False,
+):
     if use_paper_optimal_drones:
         list_optimal_drones = [
-            "drone_nsga_46295d0_1",  # opt1
-            "drone_nsga_46295d0_2",  # opt2
-            "drone_nsga_46295d0_3",  # opt3
-            "drone_nsga_46295d0_4",  # opt4
+            "opt1",
+            "opt2",
+            "opt3",
+            "opt4",
         ]
     else:
         list_optimal_drones = select_four_nsga_drones()
-    fitness, traj_specs, traj_state = evaluate_drones(["fixed_wing_drone_back"] + list_optimal_drones)
+    fitness, traj_specs, traj_state = evaluate_drones(["bix3"] + list_optimal_drones)
     drones_colors = ["#D62728", "#FF7F0E", "#CBBF5F", "#15B7C3", "#2CA02C"]
     list_short_name = ["bix3", "opt1", "opt2", "opt3", "opt4"]
     print_computational_time_nsga(list_result_nsga)
     plot_pareto_front(list_result_nsga, fitness, drones_colors, list_short_name, save)
+    if plots_icra_video:
+        video_pareto_front_evolution(list_result_nsga, fitness, drones_colors, save)
     plot_trajectories(traj_state[index_task], drones_colors, list_short_name, save)
-    video_trajectories(traj_state[index_task], drones_colors, list_short_name, save)
+    if plots_icra_video:
+        video_trajectories(traj_state[index_task], drones_colors, list_short_name, save)
     plt.show()
 
 
@@ -507,14 +695,15 @@ if __name__ == "__main__":
     # if you leave the code unchanged, it will plot the results of the paper (figures 5, 6, and 7).
     # if you want to plot your own results, change the path of the csv files in `list_result_nsga`
     list_result_nsga = [
-        {"pkl": "result/deap_2023-07-08_09h43m49s", "name": "A"},
-        {"pkl": "result/deap_2023-07-09_19h54m55s", "name": "B"},
-        {"pkl": "result/deap_2023-07-10_23h54m13s", "name": "C"},
-        {"pkl": "result/deap_2023-07-12_09h12m55s", "name": "D"},
-        {"pkl": "result/deap_2023-07-13_19h04m08s", "name": "E"},
-        {"pkl": "result/deap_2023-07-25_11h13m36s", "name": "F"},
-        {"pkl": "result/deap_2023-07-29_22h52m27s", "name": "G"},
-        {"pkl": "result/deap_2023-07-31_08h35m26s", "name": "H"},
+        {"pkl": "result/deap_2024-02-14_10h41m15s", "name": "A"},
+        {"pkl": "result/deap_2024-02-16_14h53m42s", "name": "B"},
+        {"pkl": "result/deap_2024-02-17_05h10m17s", "name": "C"},
+        {"pkl": "result/deap_2024-02-17_21h00m29s", "name": "D"},
+        {"pkl": "result/deap_2024-02-18_13h04m48s", "name": "E"},
+        {"pkl": "result/deap_2024-02-19_03h40m06s", "name": "F"},
+        {"pkl": "result/deap_2024-02-19_20h43m05s", "name": "G"},
+        {"pkl": "result/deap_2024-02-20_13h02m33s", "name": "H"},
+        {"pkl": "result/deap_2024-02-21_07h20m53s", "name": "I"},
     ]
 
     # Use the opt drones of the paper of choose randomly 4 drones from the pareto front
@@ -523,4 +712,4 @@ if __name__ == "__main__":
     # select the task to be plotted (Figure 5 of the paper)
     index_task = 1  # From 0 to 5
 
-    plot_codesign(list_result_nsga, use_paper_optimal_drones, index_task, False)
+    plot_codesign(list_result_nsga, use_paper_optimal_drones, index_task, True, False)

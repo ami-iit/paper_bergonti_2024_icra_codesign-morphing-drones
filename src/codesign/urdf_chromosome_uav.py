@@ -591,6 +591,7 @@ def create_urdf_model(chromosome: list, overwrite: bool) -> str:
                         servomotor_model["inertia_zz"].values[0],
                     ],
                     servomotor_power_constants=[R, kV, kI],
+                    viscous_friction=servomotor_model["viscous_friction"].values[0],
                 )
             )
             nj += joint_obj().name[0]
@@ -622,6 +623,7 @@ def create_urdf_model(chromosome: list, overwrite: bool) -> str:
                             propeller_model["power_coeff_c1"].values[0],
                             propeller_model["power_coeff_c2"].values[0],
                         ],
+                        ratio_torque_thrust=propeller_model["ratio_torque_thrust"].values[0],
                     ).set_tag(f"_{i}")
                 )
 

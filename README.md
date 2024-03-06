@@ -7,30 +7,28 @@ Co-Design Optimisation of Morphing Topology and Control of Winged Drones
 
 
 _F. Bergonti, G. Nava, V. Wüest, A. Paolino, G. L'Erario, D. Pucci, D. Floreano "Co-Design Optimisation of Morphing Topology and Control of Winged Drones" in 
-TODO, vol. TODO, no. TODO, pp. TODO-TODO, mm YYYY, doi: TODO_
+2024 International Conference on Robotics and Automation (ICRA), 05 2024_
+<!-- TODO: Add pp. and DOI -->
 
 </div>
 
 <p align="center">
 
-Video TODO
+https://github.com/ami-iit/paper_bergonti_2024_icra_codesign-morphing-drones/assets/38210073/9303a1b1-40c2-44cc-9146-23eb557068d6
 
 </p>
 
 <div align="center">
-  TODO
+  <a href="#installation"><b>Installation</b></a> |
+  <!-- <a href="TODO"><b>Paper</b></a> | -->
+  <a href="https://arxiv.org/abs/2309.13948"><b>arXiv</b></a> |
+  <a href="https://youtu.be/uWYuQ8gT404"><b>Video</b></a>
 </div>
 
-<div align="center">
-  <a href="#installation"><b>Installation</b></a> |
-  <a href="TODO"><b>Paper</b></a> |
-  <a href="https://arxiv.org/abs/2309.13948"><b>arXiv</b></a> |
-  <a href="TODO"><b>Video</b></a>
-</div>
 
 ## Abstract
 
-The design and control of winged aircraft and drones is an iterative process aimed at identifying a compromise of mission-specific costs and constraints. When agility is required, shape-shifting (morphing) drones represent an efficient solution. However, morphing drones require the addition of actuated joints that increase the topology and control coupling, making the design process more complex. We propose a co-design optimisation method that assists the engineers by proposing a morphing drone's conceptual design that includes topology, actuation, morphing strategy, and controller parameters. The method consists of applying multi-objective constraint-based optimisation to a multi-body winged drone with trajectory optimisation to solve the motion intelligence problem under diverse flight mission requirements. We show that co-designed morphing drones outperform fixed-winged drones in terms of energy efficiency and agility, suggesting that the proposed co-design method could be a useful addition to the aircraft engineering toolbox.
+The design and control of winged aircraft and drones is an iterative process aimed at identifying a compromise of mission-specific costs and constraints. When agility is required, shape-shifting (morphing) drones represent an efficient solution. However, morphing drones require the addition of actuated joints that increase the topology and control coupling, making the design process more complex. We propose a co-design optimisation method that assists the engineers by proposing a morphing drone’s conceptual design that includes topology, actuation, morphing strategy, and controller parameters. The method consists of applying multi-objective constraint-based optimisation to a multi-body winged drone with trajectory optimisation to solve the motion intelligence problem under diverse flight mission requirements, such as energy consumption and mission completion time. We show that co-designed morphing drones outperform fixed-winged drones in terms of energy efficiency and mission time, suggesting that the proposed co-design method could be a useful addition to the aircraft engineering toolbox.
 
 ## Installation
 
@@ -63,14 +61,14 @@ Please refer to [the documentation in `robotology-superbuild`](https://github.co
     ```
 5. Install python repository:
     ```sh
-    pip install -e .
+    pip install --no-deps -e .
     ```
 
 > [!WARNING]
 > When you activate the conda environment, the ROS environment is automatically sourced. If you want to deactivate the ROS environment, you should open a new terminal.
 
 > [!WARNING]
-> Note that to replicate the paper results, you need to install the HSL solvers (here we use `ma27`), which can be downloaded but not redistributed. Please check [here](https://licences.stfc.ac.uk/product/coin-hsl). Once you have downloaded and configured the solver, you have to modify [this line](TODO) and set `ma27`.
+> Note that to replicate the paper results, you need to install the HSL solvers (here we use `ma27`), which can be downloaded but not redistributed. Please check [here](https://licences.stfc.ac.uk/product/coin-hsl). Once you have downloaded and configured the solver, you have to modify [this line](https://github.com/ami-iit/paper_bergonti_2024_icra_codesign-morphing-drones/blob/main/src/traj/trajectory.py#L51) and set `ma27`.
 
 > [!NOTE]
 > The installation procedure has been tested on `Ubuntu 22.04` in a `WSL2` environment. Windows is not supported due to the lack of support for the `ros-noetic-jsk-rviz-plugins` package as of October 2023.
@@ -81,7 +79,7 @@ The results of the paper can be reproduced by running the following scripts:
 - [`run_codesign.py`](src/run_codesign.py)
 - [`run_validation.py`](src/run_validation.py)
 
-The running time is approximately ~31.9 hours and ~4.2 hours for [`run_codesign.py`](src/run_codesign.py) and [`run_validation.py`](src/run_validation.py), respectively, on a PC with an Intel Xeon Silver 4214 CPU (48 cores).
+The running time is approximately ~15.7 hours for [`run_codesign.py`](src/run_codesign.py) and ~1.7 hours for [`run_validation.py`](src/run_validation.py) on a machine with two AMD EPYC 7513 CPUs, utilizing 100 cores.
 
 The figures from the paper can be reproduced by running the following scripts:
 - [`plot_codesign.py`](src/plot_codesign.py)
@@ -92,11 +90,12 @@ The figures from the paper can be reproduced by running the following scripts:
 If you find the work useful, please consider citing:
 
 ```bibtex
-@article{bergonti2023co,
+@article{bergonti2024co,
   title={Co-Design Optimisation of Morphing Topology and Control of Winged Drones},
   author={Bergonti, Fabio and Nava, Gabriele and W{\"u}est, Valentin and Paolino, Antonello and L'Erario, Giuseppe and Pucci, Daniele and Floreano, Dario},
-  journal={arXiv preprint arXiv:2309.13948},
-  year={2023}
+  booktitle={2024 International Conference on Robotics and Automation (ICRA)},
+  year={2024},
+  organization={IEEE}
 }
 ```
 

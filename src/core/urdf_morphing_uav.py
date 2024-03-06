@@ -50,6 +50,7 @@ class Drone_generic_joint:
         xyz: list = [0, 0, 0],
         rpy: list = [0, 0, 0],
         servomotor_power_constants: list = [1, 1, 1],  # [R,kV,kI]
+        viscous_friction: float = 0,
     ):
         self.motor = {
             "mass": mass,
@@ -57,6 +58,7 @@ class Drone_generic_joint:
             "pos_b_com": xyz,
             "rpy_b_com": rpy,
             "servomotor_power_constants": servomotor_power_constants,
+            "viscous_friction": viscous_friction,
         }
         return self
 
@@ -76,7 +78,13 @@ class Fixed_joint(Drone_generic_joint):
         return 0
 
     def set_motor_param(
-        self, mass: float = 0, inertia: list = [], xyz: list = [], rpy: list = [], servomotor_power_constants: list = []
+        self,
+        mass: float = 0,
+        inertia: list = [],
+        xyz: list = [],
+        rpy: list = [],
+        servomotor_power_constants: list = [],
+        viscous_friction: float = 0,
     ):
         self.motor = {
             "mass": 0,
@@ -84,6 +92,7 @@ class Fixed_joint(Drone_generic_joint):
             "pos_b_com": [0, 0, 0],
             "rpy_b_com": [0, 0, 0],
             "servomotor_power_constants": [0, 0, 0],
+            "viscous_friction": 0,
         }
         return self
 
@@ -198,7 +207,9 @@ class URDF_drone_generator:
         self.list_thrust_limit = []
         self.list_dot_thrust_limit = []
         self.list_coeff_thrust_to_power = []
+        self.list_ratio_torque_thrust = []
         self.list_servomotor_power_constants = []
+        self.list_viscous_friction = []
         self.aero_frames = []
         self.aero_pickle_model = []
         self.aero_cross_section = []
@@ -338,6 +349,7 @@ class URDF_drone_generator:
                 self.list_tor_limit_actuated_joints.append(joint_param[i].torque_limit)
                 self.list_dot_tor_limit_actuated_joints.append(joint_param[i].dot_torque_limit)
                 self.list_servomotor_power_constants.append(joint_param[i].motor["servomotor_power_constants"])
+                self.list_viscous_friction.append(joint_param[i].motor["viscous_friction"])
 
         i = 0
         self.odio_urdf_robot(
@@ -458,6 +470,7 @@ class URDF_drone_generator:
         self.list_thrust_limit.append(propeller_param.thrust_limit)
         self.list_dot_thrust_limit.append(propeller_param.dot_thrust_limit)
         self.list_coeff_thrust_to_power.append(propeller_param.coeff_thrust_to_power)
+        self.list_ratio_torque_thrust.append(propeller_param.ratio_torque_thrust)
 
     def _set_colors(self):
         self.odio_urdf_robot(Material("grey", Color(rgba="0.7 0.7 0.7 1")))
@@ -488,6 +501,7 @@ class URDF_drone_generator:
         out["joints"]["tor_limits_ub"] = self.list_tor_limit_actuated_joints
         out["joints"]["dot_tor_limits_ub"] = self.list_dot_tor_limit_actuated_joints
         out["joints"]["servomotor_power_constants"] = self.list_servomotor_power_constants
+        out["joints"]["servomotor_viscous_friction"] = self.list_viscous_friction
         out["aerodynamics"] = {}
         out["aerodynamics"]["list_frames"] = self.aero_frames
         out["aerodynamics"]["list_model"] = self.aero_pickle_model
@@ -502,6 +516,7 @@ class URDF_drone_generator:
         out["propellers"]["thrust_limits_ub"] = self.list_thrust_limit
         out["propellers"]["dot_thrust_limits_ub"] = self.list_dot_thrust_limit
         out["propellers"]["coeff_thrust_to_power"] = self.list_coeff_thrust_to_power
+        out["propellers"]["ratio_torque_thrust"] = self.list_ratio_torque_thrust
         out["collisions"] = {}
         out["collisions"]["list_frames"] = self.collision_frames
         out["controller_parameters"] = asdict(self.controller_parameters)
@@ -570,6 +585,7 @@ class Propeller_UAV:
     thrust_limit: float = 50000
     dot_thrust_limit: float = 50000
     coeff_thrust_to_power: List = field(default_factory=lambda: [0, 20, 2])
+    ratio_torque_thrust: float = 0
     mesh_scale: List[float] = field(default_factory=lambda: [0.001, 0.001, 0.001])
 
     def set_pos(self, pos):
@@ -658,7 +674,10 @@ if __name__ == "__main__":
                         torque_limit=1.5,
                         dot_torque_limit=2 * 1.5,
                     ).set_motor_param(
-                        mass=0.082, inertia=[1.8e-05, 1.8e-05, 1.8e-05], servomotor_power_constants=[5.2, 0.67, 1.30]
+                        mass=0.082,
+                        inertia=[1.8e-05, 1.8e-05, 1.8e-05],
+                        servomotor_power_constants=[5.2, 0.67, 1.30],
+                        viscous_friction=1e-5,
                     )
                 )
                 nj += joint_obj().name[0]

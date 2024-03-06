@@ -9,11 +9,11 @@ if __name__ == "__main__":
     # The aerodynamic model can be changed by updating the pickle file in `aerodynamics/database_aerodynamic_models`.
     # Parameters of the evolutionary algorithm can be modified here.
     cod = Codesign_DEAP(
-        n_pop=100,
-        n_gen=100,
-        crossover_prob=0.9,
-        mutation_prob=1 / 15,
-        start_with_feasible_initial_population=False,
-        n_processors=multiprocessing.cpu_count(),
+        n_pop=100,  # Number of individuals in the population, should be multiple of 4
+        n_gen=100,  # Number of generations
+        crossover_prob=0.9,  # Probability of crossover
+        mutation_prob=1 / 15,  # Probability of mutation
+        start_with_feasible_initial_population=False,  # If True, the initial population is generated with a random process that ends when all individuals are feasible
+        n_processors=multiprocessing.cpu_count(),  # Number of processors to use
     )
     pop = cod.run()

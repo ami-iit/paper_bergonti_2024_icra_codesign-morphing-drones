@@ -9,7 +9,8 @@ import multiprocessing
 
 def load_pickle_aerodynamic_model(name_pickle):
     if os.path.isfile(name_pickle):
-        fun = pickle.load(open(name_pickle, "rb"))
+        with open(name_pickle, "rb") as f:
+            fun = pickle.load(f)
     else:
         print(f"aerodynamic model {name_pickle} doesn't exist. Loading an empty model.")
         fun = {}
@@ -214,4 +215,5 @@ if __name__ == "__main__":
                 fun[c] = result
                 compute_metrics(fun, data, c)
 
-        s = pickle.dump(fun, open(repo_tree["name_pickle"], "wb"))
+        with open(repo_tree["name_pickle"], "wb") as f:
+            s = pickle.dump(fun, f)

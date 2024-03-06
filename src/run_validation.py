@@ -61,12 +61,13 @@ def define_task(
     )
     obs1 = [goal_dist / 2 * np.cos(np.deg2rad(goal_angl)), goal_dist / 2 * np.sin(np.deg2rad(goal_angl)), 0]
     obs2 = [3 * goal_dist / 2 * np.cos(np.deg2rad(goal_angl)), goal_dist / 2 * np.sin(np.deg2rad(goal_angl)), 0]
-    if obst_type == "sphere":
-        list_obstacles.append(Obstacle_Sphere(xyz=obs1, r=obst_radius))
-        list_obstacles.append(Obstacle_Sphere(xyz=obs2, r=obst_radius))
-    elif obst_type == "cylinder":
-        list_obstacles.append(Obstacle_InfiniteCylinder(xy=obs1[:2], r=obst_radius))
-        list_obstacles.append(Obstacle_InfiniteCylinder(xy=obs2[:2], r=obst_radius))
+    if obst_radius > 0:
+        if obst_type == "sphere":
+            list_obstacles.append(Obstacle_Sphere(xyz=obs1, r=obst_radius))
+            list_obstacles.append(Obstacle_Sphere(xyz=obs2, r=obst_radius))
+        elif obst_type == "cylinder":
+            list_obstacles.append(Obstacle_InfiniteCylinder(xy=obs1[:2], r=obst_radius))
+            list_obstacles.append(Obstacle_InfiniteCylinder(xy=obs2[:2], r=obst_radius))
     task = Task(
         name="mt",
         knots=knots,
@@ -150,7 +151,7 @@ def solve_s_trajectory(
     )
 
 
-def run_validation(dict: Dict):
+def run_validation(dict: Dict, n_process: int = 8):
     str_date = utils_muav.get_date_str()
     Database_results("multiple_trajectories").create_empty_csv_database(
         columns=[
@@ -174,7 +175,7 @@ def run_validation(dict: Dict):
         ]
     )
     db_ff = Database_results(name_database="multiple_trajectories")
-    with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+    with multiprocessing.Pool(processes=n_process) as pool:
         pool.starmap(
             solve_s_trajectory,
             [
@@ -211,18 +212,18 @@ if __name__ == "__main__":
     validation_dict = {}
     # Drone names to be tested
     validation_dict["robot"] = [
-        "fixed_wing_drone_back",  # bix3
-        "drone_nsga_46295d0_1",  # opt1
-        "drone_nsga_46295d0_2",  # opt2
-        "drone_nsga_46295d0_3",  # opt3
-        "drone_nsga_46295d0_4",  # opt4
+        "bix3",
+        "opt1",
+        "opt2",
+        "opt3",
+        "opt4",
     ]
     # List of distances to be tested (see Fig. 8 of the paper)
     validation_dict["goal_dist"] = [30, 40, 50]
     # List of angles to be tested (see Fig. 8 of the paper)
     validation_dict["goal_angl"] = [0, 10, 20, 30, 40, 50]
     # List of radii to be tested (see Fig. 8 of the paper)
-    validation_dict["obst_radius"] = [0.5, 2, 4, 6, 8]
+    validation_dict["obst_radius"] = [0, 0.5, 2, 4, 6, 8]
     # List of obstacle types to be tested (see Fig. 8 of the paper)
     validation_dict["obst_type"] = ["sphere"]
     # List of initial speed along X to be tested (see Fig. 8 of the paper)
@@ -232,4 +233,4 @@ if __name__ == "__main__":
     validation_dict["ic_pitch"] = [-5, 0, 5]
     validation_dict["ic_yaw"] = [0]
 
-    run_validation(validation_dict)
+    run_validation(validation_dict, multiprocessing.cpu_count())

@@ -2,7 +2,7 @@
 
   <env name="LIBGL_ALWAYS_SOFTWARE" value="true" /> <!-- disable the gpu otherwise rviz does not display meshes https://github.com/microsoft/wslg/issues/554 -->
 
-  <arg name="model" default="$(find ros_muav)/urdf/drone_dst_t1.urdf"/>
+  <arg name="model" default="$(find ros_muav)/urdf/opt1.urdf"/>
   <arg name="gui" default="true" />
   <arg name="rvizconfig" default="$(find ros_muav)/launch/white.rviz" />
 

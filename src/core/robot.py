@@ -85,12 +85,19 @@ class Robot:
             ub_dot_thrust=config["propellers"]["dot_thrust_limits_ub"],
         )
 
+        self.propeller_ratio_torque_thrust = config["propellers"]["ratio_torque_thrust"]
+        self.servomotor_viscous_friction = config["joints"]["servomotor_viscous_friction"]
+
         print("\tRobot loaded.\t")
         print(f"\tmass: \t{self.kinDyn.get_total_mass():.3f} kg")
 
     def get_joint_consumption(self, torque: np.ndarray, joint_vel: np.ndarray) -> np.ndarray:
         consumption = []
-        for coeff, T, w in zip(self.__servomotor_power_constants, torque, joint_vel):
+        for coeff, Tj, w, viscous_friction in zip(
+            self.__servomotor_power_constants, torque, joint_vel, self.servomotor_viscous_friction
+        ):
+            Tf = viscous_friction * w
+            T = Tj + Tf
             R = coeff[0]
             kV = coeff[1]
             kI = coeff[2]
@@ -112,7 +119,9 @@ class Robot:
         thrust = cs.SX.sym("thrust", self.nprop, 1)
         consumption = 0
         for k, coeff in enumerate(self.__servomotor_power_constants):
-            T = joint_tor[k]
+            Tj = joint_tor[k]
+            Tf = self.servomotor_viscous_friction[k] * joint_vel[k]
+            T = Tj + Tf
             w = joint_vel[k]
             R = coeff[0]
             kV = coeff[1]
@@ -179,7 +188,7 @@ class Robot:
         chord = self.aero_chord_list[aero_frame]
         wingspan = A / chord
 
-        if self.name == "fixed_wing_drone" or self.name == "fixed_wing_drone_back":
+        if self.name == "bix3":
             CL = self.aero_model_list[aero_frame]["CL"](alpha, beta, Vinf_norm, s)
             CD = self.aero_model_list[aero_frame]["CD"](alpha, beta, Vinf_norm, s)
             CY = self.aero_model_list[aero_frame]["CY"](alpha, beta, Vinf_norm, s)
@@ -205,7 +214,6 @@ class Robot:
             Cl = self.aero_model_list[aero_frame]["Cl"](alpha, beta, reynolds)  # roll
             Cm = self.aero_model_list[aero_frame]["Cm"](alpha, beta, reynolds)  # pitch
             Cn = self.aero_model_list[aero_frame]["Cn"](alpha, beta, reynolds)  # yaw
-            # TODO: check if this is correct
             D = 0.5 * A * air_density * CD * (Vinf_norm) ** 2
             L = 0.5 * A * air_density * CL * (Vinf_norm) ** 2
             Y = 0.5 * A * air_density * CY * (Vinf_norm) ** 2
@@ -289,11 +297,14 @@ class Robot:
         for i, prop_frame in enumerate(self.propellers_frame_list):
             jacobianProp_w = self.kinDyn.jacobian_fun(prop_frame)(tform_w_b, s)
             rotm_w_prop = self.kinDyn.forward_kinematics_fun(prop_frame)(tform_w_b, s)[:3, :3]
-            wrenchProp_prop = cs.vertcat(cs.SX(2, 1), prop_thrust[i], cs.SX(3, 1))
+            wrenchProp_prop = cs.vertcat(
+                cs.SX(2, 1), prop_thrust[i], cs.SX(2, 1), prop_thrust[i] * self.propeller_ratio_torque_thrust
+            )
             wrenchProp_w = cs.diagcat(rotm_w_prop, rotm_w_prop) @ wrenchProp_prop
             sum_Jt_wrenchPro_w += jacobianProp_w.T @ wrenchProp_w
 
-        dot_nu = cs.solve(M, (sum_Jt_wrenchAero_w + sum_Jt_wrenchPro_w + B @ torque - h))
+        viscous_torque = np.diag(self.servomotor_viscous_friction) @ dot_s
+        dot_nu = cs.solve(M, (sum_Jt_wrenchAero_w + sum_Jt_wrenchPro_w + B @ (torque - viscous_torque) - h))
 
         return cs.Function(
             "dot_nu",
@@ -323,7 +334,9 @@ class Robot:
         for i, prop_frame in enumerate(self.propellers_frame_list):
             jacobianProp_w = self.kinDyn.jacobian_fun(prop_frame)(tform_w_b, s)
             rotm_w_prop = self.kinDyn.forward_kinematics_fun(prop_frame)(tform_w_b, s)[:3, :3]
-            wrenchProp_prop = cs.vertcat(cs.SX(2, 1), prop_thrust[i], cs.SX(3, 1))
+            wrenchProp_prop = cs.vertcat(
+                cs.SX(2, 1), prop_thrust[i], cs.SX(2, 1), prop_thrust[i] * self.propeller_ratio_torque_thrust
+            )
             wrenchProp_w = cs.diagcat(rotm_w_prop, rotm_w_prop) @ wrenchProp_prop
             sum_Jt_wrenchPro_w += jacobianProp_w.T @ wrenchProp_w
 
@@ -364,7 +377,9 @@ class Robot:
         for i, prop_frame in enumerate(self.propellers_frame_list):
             jacobianProp_w = self.kinDyn.jacobian_fun(prop_frame)(tform_w_b, s)
             rotm_w_prop = self.kinDyn.forward_kinematics_fun(prop_frame)(tform_w_b, s)[:3, :3]
-            wrenchProp_prop = cs.vertcat(cs.SX(2, 1), prop_thrust[i], cs.SX(3, 1))
+            wrenchProp_prop = cs.vertcat(
+                cs.SX(2, 1), prop_thrust[i], cs.SX(2, 1), prop_thrust[i] * self.propeller_ratio_torque_thrust
+            )
             wrenchProp_w = cs.diagcat(rotm_w_prop, rotm_w_prop) @ wrenchProp_prop
             sum_Jt_wrenchPro_w += jacobianProp_w.T @ wrenchProp_w
 
@@ -376,7 +391,13 @@ class Robot:
 
         invM11 = cs.inv(M11)
 
-        torque = (M22 - M21 @ invM11 @ M12) @ ddot_s + (h2 - M21 @ invM11 @ h1) - (JtW2 - M21 @ invM11 @ JtW1)
+        viscous_torque = np.diag(self.servomotor_viscous_friction) @ dot_s
+        torque = (
+            (M22 - M21 @ invM11 @ M12) @ ddot_s
+            + (h2 - M21 @ invM11 @ h1)
+            - (JtW2 - M21 @ invM11 @ JtW1)
+            + viscous_torque
+        )
 
         return cs.Function(
             "torque",
@@ -409,7 +430,9 @@ class Robot:
 
         for i, prop_frame in enumerate(self.propellers_frame_list):
             rotm_w_prop = self.kinDyn.forward_kinematics_fun(prop_frame)(tform_w_b, s)[:3, :3]
-            wrenchProp_prop = cs.vertcat(cs.SX(2, 1), prop_thrust[i], cs.SX(3, 1))
+            wrenchProp_prop = cs.vertcat(
+                cs.SX(2, 1), prop_thrust[i], cs.SX(2, 1), prop_thrust[i] * self.propeller_ratio_torque_thrust
+            )
             wrenchProp_w = cs.diagcat(rotm_w_prop, rotm_w_prop) @ wrenchProp_prop
             pos_w_frame = self.kinDyn.forward_kinematics_fun(prop_frame)(tform_w_b, s)[:3, 3]
             S = cs.vertcat(cs.horzcat(I3, O3), cs.horzcat(cs.skew(pos_w_frame - pos_w_com), I3))
@@ -459,7 +482,7 @@ class Robot:
 
 
 if __name__ == "__main__":
-    robot = Robot(f"{utils_muav.get_repository_tree(relative_path=True)['urdf']}/drone_nsga_46295d0_2")
+    robot = Robot(f"{utils_muav.get_repository_tree(relative_path=True)['urdf']}/opt2")
     posquat_w_b = np.concatenate(
         (
             np.array([0, 0, 0]).T,

@@ -200,7 +200,10 @@ if __name__ == "__main__":
             name="",
             axis=[0, 1, 0],
         ).set_motor_param(
-            mass=0.018, inertia=[2.13e-06, 2.13e-06, 2.13e-06], servomotor_power_constants=[3.4, 2.15, 0.35]
+            mass=0.018,
+            inertia=[2.13e-06, 2.13e-06, 2.13e-06],
+            servomotor_power_constants=[3.4, 2.15, 0.35],
+            viscous_friction=0.0048,
         )
     )
     # drone["joints"]["aileron_right"] = copy.deepcopy(drone["joints"]["aileron_left"])
@@ -216,7 +219,10 @@ if __name__ == "__main__":
             name="",
             axis=[0, 0, 1],
         ).set_motor_param(
-            mass=0.018, inertia=[2.13e-06, 2.13e-06, 2.13e-06], servomotor_power_constants=[3.4, 2.15, 0.35]
+            mass=0.018,
+            inertia=[2.13e-06, 2.13e-06, 2.13e-06],
+            servomotor_power_constants=[3.4, 2.15, 0.35],
+            viscous_friction=0.0048,
         )
     )
     drone["joints"]["elevator"] = []
@@ -230,7 +236,10 @@ if __name__ == "__main__":
             name="",
             axis=[0, 1, 0],
         ).set_motor_param(
-            mass=0.018, inertia=[2.13e-06, 2.13e-06, 2.13e-06], servomotor_power_constants=[3.4, 2.15, 0.35]
+            mass=0.018,
+            inertia=[2.13e-06, 2.13e-06, 2.13e-06],
+            servomotor_power_constants=[3.4, 2.15, 0.35],
+            viscous_friction=0.0048,
         )
     )
 
@@ -248,11 +257,12 @@ if __name__ == "__main__":
             thrust_limit=6.142,
             dot_thrust_limit=2 * 6.142,
             coeff_thrust_to_power=[0.0, 22.36, 2.367],
+            ratio_torque_thrust=0.127,
         )
     )
     drone["controller_parameters"] = Controller_Parameters_UAV()
     drone["name_robot"] = "drone"
-    drone["fullpath_model"] = f"{utils_muav.get_repository_tree(relative_path=True)['urdf']}/fixed_wing_drone_back"
+    drone["fullpath_model"] = f"{utils_muav.get_repository_tree(relative_path=True)['urdf']}/bix3"
     udg = URDF_fixed_wing(drone)
     udg.generate_urdf()
     udg.generate_toml()
