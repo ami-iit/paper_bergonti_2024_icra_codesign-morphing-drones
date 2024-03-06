@@ -90,7 +90,7 @@ The figures from the paper can be reproduced by running the following scripts:
 If you find the work useful, please consider citing:
 
 ```bibtex
-@article{bergonti2023co,
+@article{bergonti2024co,
   title={Co-Design Optimisation of Morphing Topology and Control of Winged Drones},
   author={Bergonti, Fabio and Nava, Gabriele and W{\"u}est, Valentin and Paolino, Antonello and L'Erario, Giuseppe and Pucci, Daniele and Floreano, Dario},
   booktitle={2024 International Conference on Robotics and Automation (ICRA)},
