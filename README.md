@@ -7,7 +7,7 @@ Co-Design Optimisation of Morphing Topology and Control of Winged Drones
 
 
 _F. Bergonti, G. Nava, V. Wüest, A. Paolino, G. L'Erario, D. Pucci, D. Floreano "Co-Design Optimisation of Morphing Topology and Control of Winged Drones" in 
-2024 International Conference on Robotics and Automation (ICRA), 05 2024
+2024 International Conference on Robotics and Automation (ICRA), 05 2024_
 <!-- TODO: Add pp. and DOI -->
 
 </div>
