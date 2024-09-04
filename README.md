@@ -7,8 +7,7 @@ Co-Design Optimisation of Morphing Topology and Control of Winged Drones
 
 
 _F. Bergonti, G. Nava, V. Wüest, A. Paolino, G. L'Erario, D. Pucci, D. Floreano "Co-Design Optimisation of Morphing Topology and Control of Winged Drones" in 
-2024 International Conference on Robotics and Automation (ICRA), 05 2024_
-<!-- TODO: Add pp. and DOI -->
+2024 IEEE International Conference on Robotics and Automation (ICRA), Yokohama, Japan, May 2024, pp. 8679-8685, doi: 10.1109/ICRA57147.2024.10611506.
 
 </div>
 
@@ -20,7 +19,7 @@ https://github.com/ami-iit/paper_bergonti_2024_icra_codesign-morphing-drones/ass
 
 <div align="center">
   <a href="#installation"><b>Installation</b></a> |
-  <!-- <a href="TODO"><b>Paper</b></a> | -->
+  <a href="https://ieeexplore.ieee.org/abstract/document/10611506"><b>Paper</b></a> | 
   <a href="https://arxiv.org/abs/2309.13948"><b>arXiv</b></a> |
   <a href="https://youtu.be/uWYuQ8gT404"><b>Video</b></a>
 </div>
@@ -90,10 +89,11 @@ The figures from the paper can be reproduced by running the following scripts:
 If you find the work useful, please consider citing:
 
 ```bibtex
-@article{bergonti2024co,
-  title={Co-Design Optimisation of Morphing Topology and Control of Winged Drones},
-  author={Bergonti, Fabio and Nava, Gabriele and W{\"u}est, Valentin and Paolino, Antonello and L'Erario, Giuseppe and Pucci, Daniele and Floreano, Dario},
-  booktitle={2024 International Conference on Robotics and Automation (ICRA)},
+@inproceedings{bergonti2024co,
+  title={Co-design optimisation of morphing topology and control of winged drones},
+  author={Bergonti, Fabio and Nava, Gabriele and W{\"u}est, Valentin and Paolino, Antonello and L’Erario, Giuseppe and Pucci, Daniele and Floreano, Dario},
+  booktitle={2024 IEEE International Conference on Robotics and Automation (ICRA)},
+  pages={8679--8685},
   year={2024},
   organization={IEEE}
 }
