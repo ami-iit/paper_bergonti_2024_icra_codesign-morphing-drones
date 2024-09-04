@@ -84,6 +84,9 @@ The figures from the paper can be reproduced by running the following scripts:
 - [`plot_codesign.py`](src/plot_codesign.py)
 - [`plot_validation.py`](src/plot_validation.py)
 
+
+https://github.com/user-attachments/assets/48d7fd2a-a4b7-4d10-b4ca-d680dae1e999
+
 ## Citing this work
 
 If you find the work useful, please consider citing:
