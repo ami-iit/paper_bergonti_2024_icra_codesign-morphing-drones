@@ -84,6 +84,7 @@ The figures from the paper can be reproduced by running the following scripts:
 - [`plot_codesign.py`](src/plot_codesign.py)
 - [`plot_validation.py`](src/plot_validation.py)
 
+Here is a video that shows four co-designed drones and the Bixler 3. For more details, please refer to Section VI.A and Figures 5-7 of the paper.
 
 https://github.com/user-attachments/assets/48d7fd2a-a4b7-4d10-b4ca-d680dae1e999
 
