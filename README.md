@@ -99,7 +99,7 @@ If you find the work useful, please consider citing:
   booktitle={2024 IEEE International Conference on Robotics and Automation (ICRA)},
   pages={8679--8685},
   year={2024},
-  organization={IEEE}
+  organization={IEEE},
   doi={10.1109/ICRA57147.2024.10611506}
 }
 ```
