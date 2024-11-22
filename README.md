@@ -100,6 +100,7 @@ If you find the work useful, please consider citing:
   pages={8679--8685},
   year={2024},
   organization={IEEE}
+  doi={10.1109/ICRA57147.2024.10611506}
 }
 ```
 
